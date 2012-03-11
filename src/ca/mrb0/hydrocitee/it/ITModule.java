@@ -2,9 +2,8 @@ package ca.mrb0.hydrocitee.it;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.Callable;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -14,14 +13,28 @@ public class ITModule {
 
 	private SongValues songSettings;
 	private int orders[];
-	
+	private String songMessage = "";
 	
 	public static int unpack16(byte arr[], int offs) {
-		return ((int)arr[offs+1] << 8) | (int)arr[offs];
+		return ((int)(0xff & arr[offs+1]) << 8) | (int)(0xff & arr[offs]);
 	}
 	
 	public static long unpack32(byte arr[], int offs) {
-		return ((long)arr[offs+3] << 32) | ((long)arr[offs+2] << 16) | ((long)arr[offs+1] << 8) | (long)arr[offs];
+		long out = 0;
+		out |= (long)(0xff & arr[offs]);
+		out |= (long)(0xff & arr[offs+1]) << 8;
+		out |= (long)(0xff & arr[offs+2]) << 16;
+		out |= (long)(0xff & arr[offs+3]) << 24;
+		return out;
+	}
+	
+	public static int arrayIndexOf(byte[] haystack, byte needle) {
+		for(int i = 0; i < haystack.length; i++) {
+			if (haystack[i] == needle) {
+				return i;
+			}
+		}
+		return -1;
 	}
 	
 	public static ITModule newFromInputStream(InputStream is) throws IOException {
@@ -39,11 +52,12 @@ public class ITModule {
 		if (is.read(songNameBytes) != songNameBytes.length) {
 			throw new IllegalArgumentException("truncated reading song name");
 		}
-		int nul = Arrays.asList(songNameBytes).indexOf('\0');
+		
+		int nul = arrayIndexOf(songNameBytes, (byte)0);
 		if (nul == -1) {
 			nul = 26;
 		}
-		// TODO: rtrim songname?
+
 		String songName = new String(Arrays.copyOfRange(songNameBytes, 0, nul), "windows-1252");
 		
 		byte params[] = new byte[34];
@@ -70,54 +84,64 @@ public class ITModule {
 		boolean oldfx = (flags & 0x10) != 0;
 		boolean linked = (flags & 0x20) != 0;
 
-		int gv = params[18];
-		int mv = params[19];
-		int speed = params[20];
-		int tempo = params[21];
-		int sep = params[22];
+		int special = unpack16(params, 16);
+		boolean hasMessage = (special & 0x1) != 0;
+		
+		
+		int gv = 0xff & params[18];
+		int mv = 0xff & params[19];
+		int speed = 0xff & params[20];
+		int tempo = 0xff & params[21];
+		int sep = 0xff & params[22];
 		
 		int msglen = unpack16(params, 24);
 		long msgoffs = unpack32(params, 26);
 		
 		mod.songSettings = new SongValues(songName, cwt_major, cwt_minor, cmwt_major, cmwt_minor, stereo, instruments, linear, oldfx, linked, gv, mv, speed, tempo, sep);
 		
-		mod.orders = new int[ordnum];
-		l.debug(String.format("read %d orders", ordnum));
-		for(int i = 0; i < ordnum; i++) {
-			l.debug(String.format("    %d", i));
-			
-			int next = is.read();
-			if (next == -1) {
-				throw new IllegalArgumentException("couldn't read all the orders");
-			}
-			mod.orders[0] = next;
-		}
+		int channelPans[] = readByteBlock(is, 64);
+		int channelVols[] = readByteBlock(is, 64);
 		
+		mod.orders = readByteBlock(is, ordnum);
 		
-		long insOffsets[] = loadLongBlock(is, insnum);
-		long smpOffsets[] = loadLongBlock(is, smpnum);
-		long patOffsets[] = loadLongBlock(is, patnum);
+		long insOffsets[] = readLongBlock(is, insnum);
+		long smpOffsets[] = readLongBlock(is, smpnum);
+		long patOffsets[] = readLongBlock(is, patnum);
 		
 		long startOffset = 0x00c0 + ordnum + (insnum * 4) + (smpnum * 4) + (patnum * 4);
-		byte fileContents[] = new byte[0];
+		byte contents[] = new byte[0];
 		
 		byte buf[] = new byte[2048];
 		int read;
-		while(0 != (read = is.read(buf))) {
-			int oldLen = fileContents.length;
+		while(-1 != (read = is.read(buf))) {
+			int oldLen = contents.length;
 			
-			fileContents = Arrays.copyOf(fileContents, oldLen + read);
+			contents = Arrays.copyOf(contents, oldLen + read);
 			for(int i = 0; i < read; i++) {
-				fileContents[oldLen + i] = buf[i];
+				contents[oldLen + i] = buf[i];
 			}
 		}
 		
-		
+		if (hasMessage) {
+			int offs = (int)(msgoffs - startOffset);
+			
+			byte msgdata[] = Arrays.copyOfRange(contents, offs, offs + msglen);
+			nul = arrayIndexOf(msgdata, (byte)0);
+			if (nul == -1) {
+				nul = msgdata.length;
+			}
+			for(int i = 0; i < msgdata.length; i++) {
+				if (msgdata[i] == 0x0d) {
+					msgdata[i] = "\n".getBytes("windows-1252")[0];
+				}
+			}
+			mod.songMessage = new String(Arrays.copyOf(msgdata, nul), "windows-1252");
+		}
 		
 		return mod;
 	}
 	
-	private static long[] loadLongBlock(InputStream is, int count) throws IOException {
+	private static long[] readLongBlock(InputStream is, int count) throws IOException {
 		long offsets[] = new long[count];
 		for(int i = 0; i < count; i++) {
 			byte offs[] = new byte[4];
@@ -127,6 +151,18 @@ public class ITModule {
 			offsets[i] = unpack32(offs, 0);
 		}
 		return offsets;
+	}
+	
+	private static int[] readByteBlock(InputStream is, int count) throws IOException {
+		int bytes[] = new int[count];
+		for(int i = 0; i < count; i++) {
+			int b = is.read();
+			if (b == -1) {
+				throw new IllegalArgumentException("couldn't read all the bytes");
+			}
+			bytes[i] = b;
+		}
+		return bytes;
 	}
 	
 	public SongValues getValues() {
