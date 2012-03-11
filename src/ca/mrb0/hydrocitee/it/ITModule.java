@@ -3,7 +3,6 @@ package ca.mrb0.hydrocitee.it;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -14,7 +13,9 @@ public class ITModule {
 	private SongValues songSettings;
 	private int orders[];
 	private String songMessage = "";
-	
+	private ITChannel channels[] = new ITChannel[64];
+	private ITInstrument instruments[];
+			
 	public static int unpack16(byte arr[], int offs) {
 		return ((int)(0xff & arr[offs+1]) << 8) | (int)(0xff & arr[offs]);
 	}
@@ -26,6 +27,31 @@ public class ITModule {
 		out |= (long)(0xff & arr[offs+2]) << 16;
 		out |= (long)(0xff & arr[offs+3]) << 24;
 		return out;
+	}
+	
+	
+	private static long[] readLongBlock(InputStream is, int count) throws IOException {
+		long offsets[] = new long[count];
+		for(int i = 0; i < count; i++) {
+			byte offs[] = new byte[4];
+			if (is.read(offs) != offs.length) {
+				throw new IllegalArgumentException("couldn't read all the offsets");
+			}
+			offsets[i] = unpack32(offs, 0);
+		}
+		return offsets;
+	}
+	
+	private static int[] readByteBlock(InputStream is, int count) throws IOException {
+		int bytes[] = new int[count];
+		for(int i = 0; i < count; i++) {
+			int b = is.read();
+			if (b == -1) {
+				throw new IllegalArgumentException("couldn't read all the bytes");
+			}
+			bytes[i] = b;
+		}
+		return bytes;
 	}
 	
 	public static int arrayIndexOf(byte[] haystack, byte needle) {
@@ -102,12 +128,17 @@ public class ITModule {
 		int channelPans[] = readByteBlock(is, 64);
 		int channelVols[] = readByteBlock(is, 64);
 		
+		for(int i = 0; i < 64; i++) {
+			mod.channels[i] = new ITChannel(channelPans[i], channelVols[i]);
+		}
+		
 		mod.orders = readByteBlock(is, ordnum);
 		
 		long insOffsets[] = readLongBlock(is, insnum);
 		long smpOffsets[] = readLongBlock(is, smpnum);
 		long patOffsets[] = readLongBlock(is, patnum);
 		
+		// get lazy and read the rest of the inputstream immediately so we can randomly address the remaining data
 		long startOffset = 0x00c0 + ordnum + (insnum * 4) + (smpnum * 4) + (patnum * 4);
 		byte contents[] = new byte[0];
 		
@@ -138,31 +169,14 @@ public class ITModule {
 			mod.songMessage = new String(Arrays.copyOf(msgdata, nul), "windows-1252");
 		}
 		
+		// load instruments
+		
+		mod.instruments = new ITInstrument[insOffsets.length];
+		for(int i = 0; i < insOffsets.length; i++) {
+			mod.instruments[i] = ITInstrument.newFromArray(contents, (int)(insOffsets[i] - startOffset));
+		}
+		
 		return mod;
-	}
-	
-	private static long[] readLongBlock(InputStream is, int count) throws IOException {
-		long offsets[] = new long[count];
-		for(int i = 0; i < count; i++) {
-			byte offs[] = new byte[4];
-			if (is.read(offs) != offs.length) {
-				throw new IllegalArgumentException("couldn't read all the offsets");
-			}
-			offsets[i] = unpack32(offs, 0);
-		}
-		return offsets;
-	}
-	
-	private static int[] readByteBlock(InputStream is, int count) throws IOException {
-		int bytes[] = new int[count];
-		for(int i = 0; i < count; i++) {
-			int b = is.read();
-			if (b == -1) {
-				throw new IllegalArgumentException("couldn't read all the bytes");
-			}
-			bytes[i] = b;
-		}
-		return bytes;
 	}
 	
 	public SongValues getValues() {

@@ -67,4 +67,93 @@ public class SongValues {
 		this.tempo = copy.tempo;
 		this.sep = copy.sep;
 	}
+
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + cmwt_major;
+		result = prime * result + cmwt_minor;
+		result = prime * result + cwt_major;
+		result = prime * result + cwt_minor;
+		result = prime * result + globalVol;
+		result = prime * result + (instruments ? 1231 : 1237);
+		result = prime * result + (linearSlides ? 1231 : 1237);
+		result = prime * result + (linkedGxx ? 1231 : 1237);
+		result = prime * result + mixingVol;
+		result = prime * result + (oldEffects ? 1231 : 1237);
+		result = prime * result + sep;
+		result = prime * result
+				+ ((songname == null) ? 0 : songname.hashCode());
+		result = prime * result + speed;
+		result = prime * result + (stereo ? 1231 : 1237);
+		result = prime * result + tempo;
+		return result;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		SongValues other = (SongValues) obj;
+		if (cmwt_major != other.cmwt_major) {
+			return false;
+		}
+		if (cmwt_minor != other.cmwt_minor) {
+			return false;
+		}
+		if (cwt_major != other.cwt_major) {
+			return false;
+		}
+		if (cwt_minor != other.cwt_minor) {
+			return false;
+		}
+		if (globalVol != other.globalVol) {
+			return false;
+		}
+		if (instruments != other.instruments) {
+			return false;
+		}
+		if (linearSlides != other.linearSlides) {
+			return false;
+		}
+		if (linkedGxx != other.linkedGxx) {
+			return false;
+		}
+		if (mixingVol != other.mixingVol) {
+			return false;
+		}
+		if (oldEffects != other.oldEffects) {
+			return false;
+		}
+		if (sep != other.sep) {
+			return false;
+		}
+		if (songname == null) {
+			if (other.songname != null) {
+				return false;
+			}
+		} else if (!songname.equals(other.songname)) {
+			return false;
+		}
+		if (speed != other.speed) {
+			return false;
+		}
+		if (stereo != other.stereo) {
+			return false;
+		}
+		if (tempo != other.tempo) {
+			return false;
+		}
+		return true;
+	}
 }
