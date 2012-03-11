@@ -1,6 +1,5 @@
 package ca.mrb0.hydrocitee.it;
 
-import java.util.Arrays;
 
 public class SongValues {
 	public String songname;
@@ -10,6 +9,7 @@ public class SongValues {
 	
 	// flags (not all represented)
 	public boolean stereo;
+	public boolean instruments;
 	public boolean linearSlides;
 	public boolean oldEffects;
 	public boolean linkedGxx;
@@ -19,24 +19,17 @@ public class SongValues {
 	public int speed;
 	public int tempo;
 	public int sep;
-	public int msglen;
-	public long msgoffs;
 	
-	public int channelPan[] = new int[64];
-	public int channelVol[] = new int[64];
-	
-	public int orders[];
-
 	public SongValues() {
 		super();
 	}
 	
+	
 	public SongValues(String songname, int cwt_major, int cwt_minor,
 			int cmwt_major, int cmwt_minor, boolean stereo,
+			boolean instruments,
 			boolean linearSlides, boolean oldEffects, boolean linkedGxx,
-			int globalVol, int mixingVol, int speed, int tempo, int sep,
-			int msglen, long msgoffs, int[] channelPan, int[] channelVol,
-			int[] orders) {
+			int globalVol, int mixingVol, int speed, int tempo, int sep) {
 		super();
 		this.songname = songname;
 		this.cwt_major = cwt_major;
@@ -44,6 +37,7 @@ public class SongValues {
 		this.cmwt_major = cmwt_major;
 		this.cmwt_minor = cmwt_minor;
 		this.stereo = stereo;
+		this.instruments = instruments;
 		this.linearSlides = linearSlides;
 		this.oldEffects = oldEffects;
 		this.linkedGxx = linkedGxx;
@@ -52,12 +46,8 @@ public class SongValues {
 		this.speed = speed;
 		this.tempo = tempo;
 		this.sep = sep;
-		this.msglen = msglen;
-		this.msgoffs = msgoffs;
-		this.channelPan = channelPan;
-		this.channelVol = channelVol;
-		this.orders = orders;
 	}
+
 
 	public SongValues(SongValues copy) {
 		super();
@@ -67,6 +57,7 @@ public class SongValues {
 		this.cmwt_major = copy.cmwt_major;
 		this.cmwt_minor = copy.cmwt_minor;
 		this.stereo = copy.stereo;
+		this.instruments = copy.instruments;
 		this.linearSlides = copy.linearSlides;
 		this.oldEffects = copy.oldEffects;
 		this.linkedGxx = copy.linkedGxx;
@@ -75,10 +66,5 @@ public class SongValues {
 		this.speed = copy.speed;
 		this.tempo = copy.tempo;
 		this.sep = copy.sep;
-		this.msglen = copy.msglen;
-		this.msgoffs = copy.msgoffs;
-		this.channelPan = Arrays.copyOf(copy.channelPan, copy.channelPan.length);
-		this.channelVol = Arrays.copyOf(copy.channelVol, copy.channelVol.length);
-		this.orders = Arrays.copyOf(copy.orders, copy.orders.length);
 	}
 }
