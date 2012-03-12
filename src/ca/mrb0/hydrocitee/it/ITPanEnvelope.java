@@ -12,8 +12,14 @@ public class ITPanEnvelope extends ITEnvelope {
 		nodes.set(List.<ITEnvelope.NodePoint>list(new NodePoint(0, 0), new NodePoint(0, 100)));
 	}
 
-	public ITPanEnvelope(ITEnvelope copy) {
+	private ITPanEnvelope(ITEnvelope copy) {
 		super(copy);
+		freeze();
+	}
+	
+	public ITPanEnvelope(ITPanEnvelope copy) {
+		super(copy);
+		freeze();
 	}
 	
 	public static ITPanEnvelope newFromData(byte data[], int offs) {
