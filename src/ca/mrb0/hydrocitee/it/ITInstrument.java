@@ -5,6 +5,9 @@ import java.util.Arrays;
 
 import org.apache.log4j.Logger;
 
+import ca.mrb0.hydrocitee.util.Prop;
+import fj.data.List;
+
 public class ITInstrument {
 	private static Logger l = Logger.getLogger(ITInstrument.class);
 	
@@ -28,33 +31,34 @@ public class ITInstrument {
 		NoteFade
 	};
 	
-	private String filename;
-	private String instrumentName;
+	// TODO: Add tests to these so we can prevent invalid values
+	public final Prop<String> filename = new Prop<String>("");
+	public final Prop<String> instrumentName = new Prop<String>("");
 	
-	private NNA nna;
-	private DCT dct;
-	private DCA dca;
+	public final Prop<NNA> nna = new Prop<NNA>(NNA.Cut);
+	public final Prop<DCT> dct = new Prop<DCT>(DCT.Off);
+	public final Prop<DCA> dca = new Prop<DCA>(DCA.Cut);
 	
-	private int fadeOut;
-	private int pitchPanSep;
-	private int pitchPanCtr;
-	private int globalVol;
-	private int defaultPan;
-	private int randVol;
-	private int randPan;
+	public final Prop<Integer> fadeOut = new Prop<Integer>(0);
+	public final Prop<Integer> pitchPanSep = new Prop<Integer>(0);
+	public final Prop<Integer> pitchPanCtr = new Prop<Integer>(0); // TODO: figure out the note for C-5 or whatever
+	public final Prop<Integer> globalVol = new Prop<Integer>(128);
+	public final Prop<Integer> defaultPan = new Prop<Integer>(0x80); // 0x80 = off
+	public final Prop<Integer> randVol = new Prop<Integer>(0);
+	public final Prop<Integer> randPan = new Prop<Integer>(0); // not implemented in IT?
 	
-	private int filterCutoff;
-	private int filterRes;
+	public final Prop<Integer> filterCutoff = new Prop<Integer>(255); // TODO: find correct values
+	public final Prop<Integer> filterRes = new Prop<Integer>(0);
 	
-	private int midiChan;
-	private int midiPgm;
-	private int midiBnk;
+	public final Prop<Integer> midiChan = new Prop<Integer>(0);
+	public final Prop<Integer> midiPgm = new Prop<Integer>(0);
+	public final Prop<Integer> midiBnk = new Prop<Integer>(0);
 	
-	private NoteSamplePair noteSampleMap[];
+	public final Prop<List<NoteSamplePair>> noteSampleMap = new Prop<List<NoteSamplePair>>(List.<NoteSamplePair>list());
 	
-	private ITVolumeEnvelope volEnv;
-	private ITPanEnvelope panEnv;
-	private ITPitchEnvelope pitchEnv;
+	public final Prop<ITVolumeEnvelope> volEnv = new Prop<ITVolumeEnvelope>();
+	public final Prop<ITPanEnvelope> panEnv = new Prop<ITPanEnvelope>();
+	public final Prop<ITPitchEnvelope> pitchEnv = new Prop<ITPitchEnvelope>();
 	
 	public static class NoteSamplePair {
 		public final int targetNote;
@@ -64,6 +68,13 @@ public class ITInstrument {
 			super();
 			this.targetNote = note;
 			this.sample = sample;
+		}
+	}
+	
+	public ITInstrument() {
+		super();
+		for(int i = 0; i < 120; i++) {
+			noteSampleMap.set(noteSampleMap.get().snoc(new NoteSamplePair(i, 0)));
 		}
 	}
 	
@@ -82,7 +93,7 @@ public class ITInstrument {
 		}
 		filename = Arrays.copyOfRange(filename, 0, nul);
 		try {
-			inst.filename = new String(filename, "windows-1252");
+			inst.filename.set(new String(filename, "windows-1252"));
 		} catch(UnsupportedEncodingException e) {
 			// hopefully shouldn't happen as we are using a hardcoded encoding
 			l.error("Unsupported encoding: " + e.toString());
@@ -91,17 +102,17 @@ public class ITInstrument {
 		
 		offs += 12;
 		offs++;
-		inst.nna = NNA.values()[0xff & data[offs++]];
-		inst.dct = DCT.values()[0xff & data[offs++]];
-		inst.dca = DCA.values()[0xff & data[offs++]];
-		inst.fadeOut = ITModule.unpack16(data, offs);
+		inst.nna.set(NNA.values()[0xff & data[offs++]]);
+		inst.dct.set(DCT.values()[0xff & data[offs++]]);
+		inst.dca.set(DCA.values()[0xff & data[offs++]]);
+		inst.fadeOut.set(ITModule.unpack16(data, offs));
 		offs += 2;
-		inst.pitchPanSep = data[offs++];
-		inst.pitchPanCtr = 0xff & data[offs++];
-		inst.globalVol = 0xff & data[offs++];
-		inst.defaultPan = 0xff & data[offs++];
-		inst.randVol = 0xff & data[offs++];
-		inst.randPan = 0xff & data[offs++];
+		inst.pitchPanSep.set((int)data[offs++]);
+		inst.pitchPanCtr.set(0xff & data[offs++]);
+		inst.globalVol.set(0xff & data[offs++]);
+		inst.defaultPan.set(0xff & data[offs++]);
+		inst.randVol.set(0xff & data[offs++]);
+		inst.randPan.set(0xff & data[offs++]);
 		offs += 4;
 		
 		byte instname[] = Arrays.copyOfRange(data, offs, offs + 26);
@@ -111,7 +122,7 @@ public class ITInstrument {
 		}
 		instname = Arrays.copyOf(instname, nul);
 		try {
-			inst.instrumentName = new String(instname, "windows-1252");
+			inst.instrumentName.set(new String(instname, "windows-1252"));
 		} catch(UnsupportedEncodingException e) {
 			// hopefully shouldn't happen as we are using a hardcoded encoding
 			l.error("Unsupported encoding: " + e.toString());
@@ -120,25 +131,56 @@ public class ITInstrument {
 		
 		offs += 26;
 		
-		inst.filterCutoff = 0xff & data[offs++];
-		inst.filterRes = 0xff & data[offs++];
-		inst.midiChan = 0xff & data[offs++];
-		inst.midiPgm = 0xff & data[offs++];
-		inst.midiBnk = ITModule.unpack16(data, offs);
+		inst.filterCutoff.set(0xff & data[offs++]);
+		inst.filterRes.set(0xff & data[offs++]);
+		inst.midiChan.set(0xff & data[offs++]);
+		inst.midiPgm.set(0xff & data[offs++]);
+		inst.midiBnk.set(ITModule.unpack16(data, offs));
 		offs += 2;
 		
-		inst.noteSampleMap = new NoteSamplePair[120];
-		for(int i = 0; i < inst.noteSampleMap.length; i++) {
-			inst.noteSampleMap[i] = new NoteSamplePair(0xff & data[offs], 0xff & data[offs+1]);
+		for(int i = 0; i < 120; i++) {
+			inst.noteSampleMap.set(inst.noteSampleMap.get().snoc(new NoteSamplePair(0xff & data[offs], 0xff & data[offs+1])));
 			offs += 2;
 		}
 		
-		inst.volEnv = ITVolumeEnvelope.newFromData(data, offs);
+		inst.volEnv.set(ITVolumeEnvelope.newFromData(data, offs));
 		offs += 0x52;
-		inst.panEnv = ITPanEnvelope.newFromData(data, offs);
+		inst.panEnv.set(ITPanEnvelope.newFromData(data, offs));
 		offs += 0x52;
-		inst.pitchEnv = ITPitchEnvelope.newFromData(data, offs);
+		inst.pitchEnv.set(ITPitchEnvelope.newFromData(data, offs));
+		
+		inst.freeze();
 		
 		return inst;
+	}
+	
+	private void freeze() {
+		filename.freeze();
+		instrumentName.freeze();
+		
+		nna.freeze();
+		dct.freeze();
+		dca.freeze();
+		
+		fadeOut.freeze();
+		pitchPanSep.freeze();
+		pitchPanCtr.freeze();
+		globalVol.freeze();
+		defaultPan.freeze();
+		randVol.freeze();
+		randPan.freeze();
+		
+		filterCutoff.freeze();
+		filterRes.freeze();
+		
+		midiChan.freeze();
+		midiPgm.freeze();
+		midiBnk.freeze();
+		
+		noteSampleMap.freeze();
+		
+		volEnv.freeze();
+		panEnv.freeze();
+		pitchEnv.freeze();
 	}
 }
