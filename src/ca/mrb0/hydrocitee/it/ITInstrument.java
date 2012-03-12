@@ -6,6 +6,7 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 
 import ca.mrb0.hydrocitee.util.Prop;
+import ca.mrb0.hydrocitee.util.Streams;
 import fj.data.List;
 
 public class ITInstrument {
@@ -87,7 +88,7 @@ public class ITInstrument {
 		
 		offs += 4;
 		byte filename[] = Arrays.copyOfRange(data, offs, offs + 12);
-		int nul = ITModule.arrayIndexOf(filename, (byte)0);
+		int nul = Streams.arrayIndexOf(filename, (byte)0);
 		if (nul == -1) {
 			nul = filename.length;
 		}
@@ -105,7 +106,7 @@ public class ITInstrument {
 		inst.nna.set(NNA.values()[0xff & data[offs++]]);
 		inst.dct.set(DCT.values()[0xff & data[offs++]]);
 		inst.dca.set(DCA.values()[0xff & data[offs++]]);
-		inst.fadeOut.set(ITModule.unpack16(data, offs));
+		inst.fadeOut.set(Streams.unpack16(data, offs));
 		offs += 2;
 		inst.pitchPanSep.set((int)data[offs++]);
 		inst.pitchPanCtr.set(0xff & data[offs++]);
@@ -116,7 +117,7 @@ public class ITInstrument {
 		offs += 4;
 		
 		byte instname[] = Arrays.copyOfRange(data, offs, offs + 26);
-		nul = ITModule.arrayIndexOf(instname, (byte)0);
+		nul = Streams.arrayIndexOf(instname, (byte)0);
 		if (nul == -1) {
 			nul = instname.length;
 		}
@@ -135,7 +136,7 @@ public class ITInstrument {
 		inst.filterRes.set(0xff & data[offs++]);
 		inst.midiChan.set(0xff & data[offs++]);
 		inst.midiPgm.set(0xff & data[offs++]);
-		inst.midiBnk.set(ITModule.unpack16(data, offs));
+		inst.midiBnk.set(Streams.unpack16(data, offs));
 		offs += 2;
 		
 		inst.noteSampleMap.set(List.<NoteSamplePair>list());
