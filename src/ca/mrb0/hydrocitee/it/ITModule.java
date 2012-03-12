@@ -6,15 +6,19 @@ import java.util.Arrays;
 
 import org.apache.log4j.Logger;
 
+import ca.mrb0.hydrocitee.util.Prop;
+import fj.data.List;
+
 public class ITModule {
 
 	private static Logger l = Logger.getLogger(ITModule.class);
 
-	private SongValues songSettings;
-	private int orders[];
-	private String songMessage = "";
-	private ITChannel channels[] = new ITChannel[64];
-	private ITInstrument instruments[];
+	public final Prop<SongValues> songSettings = new Prop<SongValues>();
+	public final Prop<List<Integer>> orders = new Prop<List<Integer>>();
+	
+	public final Prop<String> songMessage = new Prop<String>("");
+	public final Prop<List<ITChannel>> channels = new Prop<List<ITChannel>>(List.<ITChannel>list());
+	public final Prop<List<ITInstrument>> instruments = new Prop<List<ITInstrument>>();
 			
 	public static int unpack16(byte arr[], int offs) {
 		return ((int)(0xff & arr[offs+1]) << 8) | (int)(0xff & arr[offs]);
@@ -123,16 +127,21 @@ public class ITModule {
 		int msglen = unpack16(params, 24);
 		long msgoffs = unpack32(params, 26);
 		
-		mod.songSettings = new SongValues(songName, cwt_major, cwt_minor, cmwt_major, cmwt_minor, stereo, instruments, linear, oldfx, linked, gv, mv, speed, tempo, sep);
+		mod.songSettings.set(new SongValues(songName, cwt_major, cwt_minor, cmwt_major, cmwt_minor, stereo, instruments, linear, oldfx, linked, gv, mv, speed, tempo, sep));
 		
 		int channelPans[] = readByteBlock(is, 64);
 		int channelVols[] = readByteBlock(is, 64);
 		
+		mod.channels.set(List.<ITChannel>list());
 		for(int i = 0; i < 64; i++) {
-			mod.channels[i] = new ITChannel(channelPans[i], channelVols[i]);
+			mod.channels.set(mod.channels.get().snoc(new ITChannel(channelPans[i], channelVols[i])));
 		}
 		
-		mod.orders = readByteBlock(is, ordnum);
+		int orders[] = readByteBlock(is, ordnum);
+		mod.orders.set(List.<Integer>list());
+		for(int i = 0; i < orders.length; i++) {
+			mod.orders.set(mod.orders.get().snoc(orders[i]));
+		}
 		
 		long insOffsets[] = readLongBlock(is, insnum);
 		long smpOffsets[] = readLongBlock(is, smpnum);
@@ -166,26 +175,25 @@ public class ITModule {
 					msgdata[i] = "\n".getBytes("windows-1252")[0];
 				}
 			}
-			mod.songMessage = new String(Arrays.copyOf(msgdata, nul), "windows-1252");
+			mod.songMessage.set(new String(Arrays.copyOf(msgdata, nul), "windows-1252"));
 		}
 		
 		// load instruments
 		
-		mod.instruments = new ITInstrument[insOffsets.length];
+		mod.instruments.set(List.<ITInstrument>list());
 		for(int i = 0; i < insOffsets.length; i++) {
-			mod.instruments[i] = ITInstrument.newFromArray(contents, (int)(insOffsets[i] - startOffset));
+			mod.instruments.set(mod.instruments.get().snoc(ITInstrument.newFromArray(contents, (int)(insOffsets[i] - startOffset))));
 		}
 		
+		mod.freezeArgs();
 		return mod;
 	}
 	
-	public SongValues getValues() {
-		return new SongValues(songSettings);
+	private void freezeArgs() {
+		songSettings.freeze();
+		orders.freeze();
+		songMessage.freeze();
+		channels.freeze();
+		instruments.freeze();
 	}
-	
-	public void setValues(SongValues newValues) {
-		// TODO: Validate newValues before using it.
-		this.songSettings = new SongValues(newValues);
-	}
-	
 }
