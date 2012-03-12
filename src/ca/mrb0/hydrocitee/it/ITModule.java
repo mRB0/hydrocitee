@@ -7,6 +7,7 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 
 import ca.mrb0.hydrocitee.util.Prop;
+import ca.mrb0.hydrocitee.util.Streams;
 import fj.data.List;
 
 public class ITModule {
@@ -20,53 +21,6 @@ public class ITModule {
 	public final Prop<List<ITChannel>> channels = new Prop<List<ITChannel>>(List.<ITChannel>list());
 	public final Prop<List<ITInstrument>> instruments = new Prop<List<ITInstrument>>();
 			
-	public static int unpack16(byte arr[], int offs) {
-		return ((int)(0xff & arr[offs+1]) << 8) | (int)(0xff & arr[offs]);
-	}
-	
-	public static long unpack32(byte arr[], int offs) {
-		long out = 0;
-		out |= (long)(0xff & arr[offs]);
-		out |= (long)(0xff & arr[offs+1]) << 8;
-		out |= (long)(0xff & arr[offs+2]) << 16;
-		out |= (long)(0xff & arr[offs+3]) << 24;
-		return out;
-	}
-	
-	
-	private static long[] readLongBlock(InputStream is, int count) throws IOException {
-		long offsets[] = new long[count];
-		for(int i = 0; i < count; i++) {
-			byte offs[] = new byte[4];
-			if (is.read(offs) != offs.length) {
-				throw new IllegalArgumentException("couldn't read all the offsets");
-			}
-			offsets[i] = unpack32(offs, 0);
-		}
-		return offsets;
-	}
-	
-	private static int[] readByteBlock(InputStream is, int count) throws IOException {
-		int bytes[] = new int[count];
-		for(int i = 0; i < count; i++) {
-			int b = is.read();
-			if (b == -1) {
-				throw new IllegalArgumentException("couldn't read all the bytes");
-			}
-			bytes[i] = b;
-		}
-		return bytes;
-	}
-	
-	public static int arrayIndexOf(byte[] haystack, byte needle) {
-		for(int i = 0; i < haystack.length; i++) {
-			if (haystack[i] == needle) {
-				return i;
-			}
-		}
-		return -1;
-	}
-	
 	public static ITModule newFromInputStream(InputStream is) throws IOException {
 		ITModule mod = new ITModule();
 		
@@ -83,7 +37,7 @@ public class ITModule {
 			throw new IllegalArgumentException("truncated reading song name");
 		}
 		
-		int nul = arrayIndexOf(songNameBytes, (byte)0);
+		int nul = Streams.arrayIndexOf(songNameBytes, (byte)0);
 		if (nul == -1) {
 			nul = 26;
 		}
@@ -95,26 +49,26 @@ public class ITModule {
 			throw new IllegalArgumentException("truncated reading song params");
 		}
 		
-		int ordnum = unpack16(params, 2);
-		int insnum = unpack16(params, 4);
-		int smpnum = unpack16(params, 6);
-		int patnum = unpack16(params, 8);
-		int cwt_raw = unpack16(params, 10);
-		int cmwt_raw = unpack16(params, 12);
+		int ordnum = Streams.unpack16(params, 2);
+		int insnum = Streams.unpack16(params, 4);
+		int smpnum = Streams.unpack16(params, 6);
+		int patnum = Streams.unpack16(params, 8);
+		int cwt_raw = Streams.unpack16(params, 10);
+		int cmwt_raw = Streams.unpack16(params, 12);
 		
 		int cwt_major = (cwt_raw >> 8) & 0xf;
 		int cwt_minor = 10 * ((cwt_raw >> 4) & 0xf) + (cwt_raw & 0xf);
 		int cmwt_major = (cmwt_raw >> 8) & 0xf;
 		int cmwt_minor = 10 * ((cmwt_raw >> 4) & 0xf) + (cmwt_raw & 0xf);
 		
-		int flags = unpack16(params, 14);
+		int flags = Streams.unpack16(params, 14);
 		boolean stereo = (flags & 0x1) != 0;
 		boolean instruments = (flags & 0x4) != 0;
 		boolean linear = (flags & 0x8) != 0;
 		boolean oldfx = (flags & 0x10) != 0;
 		boolean linked = (flags & 0x20) != 0;
 
-		int special = unpack16(params, 16);
+		int special = Streams.unpack16(params, 16);
 		boolean hasMessage = (special & 0x1) != 0;
 		
 		
@@ -124,28 +78,28 @@ public class ITModule {
 		int tempo = 0xff & params[21];
 		int sep = 0xff & params[22];
 		
-		int msglen = unpack16(params, 24);
-		long msgoffs = unpack32(params, 26);
+		int msglen = Streams.unpack16(params, 24);
+		long msgoffs = Streams.unpack32(params, 26);
 		
 		mod.songSettings.set(new SongValues(songName, cwt_major, cwt_minor, cmwt_major, cmwt_minor, stereo, instruments, linear, oldfx, linked, gv, mv, speed, tempo, sep));
 		
-		int channelPans[] = readByteBlock(is, 64);
-		int channelVols[] = readByteBlock(is, 64);
+		int channelPans[] = Streams.readByteBlock(is, 64);
+		int channelVols[] = Streams.readByteBlock(is, 64);
 		
 		mod.channels.set(List.<ITChannel>list());
 		for(int i = 0; i < 64; i++) {
 			mod.channels.set(mod.channels.get().snoc(new ITChannel(channelPans[i], channelVols[i])));
 		}
 		
-		int orders[] = readByteBlock(is, ordnum);
+		int orders[] = Streams.readByteBlock(is, ordnum);
 		mod.orders.set(List.<Integer>list());
 		for(int i = 0; i < orders.length; i++) {
 			mod.orders.set(mod.orders.get().snoc(orders[i]));
 		}
 		
-		long insOffsets[] = readLongBlock(is, insnum);
-		long smpOffsets[] = readLongBlock(is, smpnum);
-		long patOffsets[] = readLongBlock(is, patnum);
+		long insOffsets[] = Streams.readLongBlock(is, insnum);
+		long smpOffsets[] = Streams.readLongBlock(is, smpnum);
+		long patOffsets[] = Streams.readLongBlock(is, patnum);
 		
 		// get lazy and read the rest of the inputstream immediately so we can randomly address the remaining data
 		long startOffset = 0x00c0 + ordnum + (insnum * 4) + (smpnum * 4) + (patnum * 4);
@@ -166,7 +120,7 @@ public class ITModule {
 			int offs = (int)(msgoffs - startOffset);
 			
 			byte msgdata[] = Arrays.copyOfRange(contents, offs, offs + msglen);
-			nul = arrayIndexOf(msgdata, (byte)0);
+			nul = Streams.arrayIndexOf(msgdata, (byte)0);
 			if (nul == -1) {
 				nul = msgdata.length;
 			}

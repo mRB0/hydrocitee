@@ -1,5 +1,6 @@
 package ca.mrb0.hydrocitee.it;
 
+import ca.mrb0.hydrocitee.util.Streams;
 import fj.data.List;
 
 
@@ -21,7 +22,7 @@ public class ITVolumeEnvelope extends ITEnvelope {
 		env.nodes.set(List.<NodePoint>list());
 		for (int i = 0; i < numPoints; i++) {
 			int val = 0xff & data[offs + 6 + i*3];
-			int tick = ITModule.unpack16(data, offs + 6 + i*3 + 1);
+			int tick = Streams.unpack16(data, offs + 6 + i*3 + 1);
 			
 			env.nodes.set(env.nodes.get().snoc(new NodePoint(val, tick)));
 		}
