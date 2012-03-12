@@ -185,11 +185,11 @@ public class ITModule {
 			mod.instruments.set(mod.instruments.get().snoc(ITInstrument.newFromArray(contents, (int)(insOffsets[i] - startOffset))));
 		}
 		
-		mod.freezeArgs();
+		mod.freeze();
 		return mod;
 	}
 	
-	private void freezeArgs() {
+	private void freeze() {
 		songSettings.freeze();
 		orders.freeze();
 		songMessage.freeze();
