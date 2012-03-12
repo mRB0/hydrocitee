@@ -10,8 +10,14 @@ public class ITVolumeEnvelope extends ITEnvelope {
 		nodes.set(List.<ITEnvelope.NodePoint>list(new NodePoint(64, 0), new NodePoint(64, 100)));
 	}
 
-	public ITVolumeEnvelope(ITEnvelope copy) {
+	private ITVolumeEnvelope(ITEnvelope copy) {
 		super(copy);
+		freeze();
+	}
+
+	public ITVolumeEnvelope(ITVolumeEnvelope copy) {
+		super(copy);
+		freeze();
 	}
 
 	public static ITVolumeEnvelope newFromData(byte data[], int offs) {

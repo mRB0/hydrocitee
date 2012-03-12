@@ -15,8 +15,15 @@ public class ITPitchEnvelope extends ITEnvelope {
 		nodes.set(List.<ITEnvelope.NodePoint>list(new NodePoint(0, 0), new NodePoint(0, 100)));
 	}
 
-	public ITPitchEnvelope(ITEnvelope copy) {
+	private ITPitchEnvelope(ITEnvelope copy) {
 		super(copy);
+		freeze();
+	}
+
+	public ITPitchEnvelope(ITPitchEnvelope copy) {
+		super(copy);
+		isFilterEnv.set(copy.isFilterEnv.get());
+		freeze();
 	}
 
 	public static ITPitchEnvelope newFromData(byte data[], int offs) {
