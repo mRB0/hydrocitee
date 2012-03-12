@@ -138,6 +138,7 @@ public class ITInstrument {
 		inst.midiBnk.set(ITModule.unpack16(data, offs));
 		offs += 2;
 		
+		inst.noteSampleMap.set(List.<NoteSamplePair>list());
 		for(int i = 0; i < 120; i++) {
 			inst.noteSampleMap.set(inst.noteSampleMap.get().snoc(new NoteSamplePair(0xff & data[offs], 0xff & data[offs+1])));
 			offs += 2;
