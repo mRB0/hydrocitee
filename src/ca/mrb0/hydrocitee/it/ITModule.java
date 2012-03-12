@@ -182,7 +182,7 @@ public class ITModule {
 		
 		mod.instruments.set(List.<ITInstrument>list());
 		for(int i = 0; i < insOffsets.length; i++) {
-			mod.instruments.set(mod.instruments.get().snoc(ITInstrument.newFromArray(contents, (int)(insOffsets[i] - startOffset))));
+			mod.instruments.set(mod.instruments.get().snoc(ITInstrument.newFromData(contents, (int)(insOffsets[i] - startOffset))));
 		}
 		
 		mod.freeze();
