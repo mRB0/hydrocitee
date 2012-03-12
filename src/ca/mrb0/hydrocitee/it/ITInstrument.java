@@ -78,7 +78,7 @@ public class ITInstrument {
 		}
 	}
 	
-	public static ITInstrument newFromArray(byte data[], int offs) {
+	public static ITInstrument newFromData(byte data[], int offs) {
 		ITInstrument inst = new ITInstrument();
 		
 		if (!Arrays.equals(Arrays.copyOfRange(data, offs, offs + 4), new byte[] { 'I', 'M', 'P', 'I' })) {
@@ -184,4 +184,206 @@ public class ITInstrument {
 		panEnv.freeze();
 		pitchEnv.freeze();
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((dca == null) ? 0 : dca.hashCode());
+		result = prime * result + ((dct == null) ? 0 : dct.hashCode());
+		result = prime * result
+				+ ((defaultPan == null) ? 0 : defaultPan.hashCode());
+		result = prime * result + ((fadeOut == null) ? 0 : fadeOut.hashCode());
+		result = prime * result
+				+ ((filename == null) ? 0 : filename.hashCode());
+		result = prime * result
+				+ ((filterCutoff == null) ? 0 : filterCutoff.hashCode());
+		result = prime * result
+				+ ((filterRes == null) ? 0 : filterRes.hashCode());
+		result = prime * result
+				+ ((globalVol == null) ? 0 : globalVol.hashCode());
+		result = prime * result
+				+ ((instrumentName == null) ? 0 : instrumentName.hashCode());
+		result = prime * result + ((midiBnk == null) ? 0 : midiBnk.hashCode());
+		result = prime * result
+				+ ((midiChan == null) ? 0 : midiChan.hashCode());
+		result = prime * result + ((midiPgm == null) ? 0 : midiPgm.hashCode());
+		result = prime * result + ((nna == null) ? 0 : nna.hashCode());
+		result = prime * result
+				+ ((noteSampleMap == null) ? 0 : noteSampleMap.hashCode());
+		result = prime * result + ((panEnv == null) ? 0 : panEnv.hashCode());
+		result = prime * result
+				+ ((pitchEnv == null) ? 0 : pitchEnv.hashCode());
+		result = prime * result
+				+ ((pitchPanCtr == null) ? 0 : pitchPanCtr.hashCode());
+		result = prime * result
+				+ ((pitchPanSep == null) ? 0 : pitchPanSep.hashCode());
+		result = prime * result + ((randPan == null) ? 0 : randPan.hashCode());
+		result = prime * result + ((randVol == null) ? 0 : randVol.hashCode());
+		result = prime * result + ((volEnv == null) ? 0 : volEnv.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		ITInstrument other = (ITInstrument) obj;
+		if (dca == null) {
+			if (other.dca != null) {
+				return false;
+			}
+		} else if (!dca.equals(other.dca)) {
+			return false;
+		}
+		if (dct == null) {
+			if (other.dct != null) {
+				return false;
+			}
+		} else if (!dct.equals(other.dct)) {
+			return false;
+		}
+		if (defaultPan == null) {
+			if (other.defaultPan != null) {
+				return false;
+			}
+		} else if (!defaultPan.equals(other.defaultPan)) {
+			return false;
+		}
+		if (fadeOut == null) {
+			if (other.fadeOut != null) {
+				return false;
+			}
+		} else if (!fadeOut.equals(other.fadeOut)) {
+			return false;
+		}
+		if (filename == null) {
+			if (other.filename != null) {
+				return false;
+			}
+		} else if (!filename.equals(other.filename)) {
+			return false;
+		}
+		if (filterCutoff == null) {
+			if (other.filterCutoff != null) {
+				return false;
+			}
+		} else if (!filterCutoff.equals(other.filterCutoff)) {
+			return false;
+		}
+		if (filterRes == null) {
+			if (other.filterRes != null) {
+				return false;
+			}
+		} else if (!filterRes.equals(other.filterRes)) {
+			return false;
+		}
+		if (globalVol == null) {
+			if (other.globalVol != null) {
+				return false;
+			}
+		} else if (!globalVol.equals(other.globalVol)) {
+			return false;
+		}
+		if (instrumentName == null) {
+			if (other.instrumentName != null) {
+				return false;
+			}
+		} else if (!instrumentName.equals(other.instrumentName)) {
+			return false;
+		}
+		if (midiBnk == null) {
+			if (other.midiBnk != null) {
+				return false;
+			}
+		} else if (!midiBnk.equals(other.midiBnk)) {
+			return false;
+		}
+		if (midiChan == null) {
+			if (other.midiChan != null) {
+				return false;
+			}
+		} else if (!midiChan.equals(other.midiChan)) {
+			return false;
+		}
+		if (midiPgm == null) {
+			if (other.midiPgm != null) {
+				return false;
+			}
+		} else if (!midiPgm.equals(other.midiPgm)) {
+			return false;
+		}
+		if (nna == null) {
+			if (other.nna != null) {
+				return false;
+			}
+		} else if (!nna.equals(other.nna)) {
+			return false;
+		}
+		if (noteSampleMap == null) {
+			if (other.noteSampleMap != null) {
+				return false;
+			}
+		} else if (!noteSampleMap.equals(other.noteSampleMap)) {
+			return false;
+		}
+		if (panEnv == null) {
+			if (other.panEnv != null) {
+				return false;
+			}
+		} else if (!panEnv.equals(other.panEnv)) {
+			return false;
+		}
+		if (pitchEnv == null) {
+			if (other.pitchEnv != null) {
+				return false;
+			}
+		} else if (!pitchEnv.equals(other.pitchEnv)) {
+			return false;
+		}
+		if (pitchPanCtr == null) {
+			if (other.pitchPanCtr != null) {
+				return false;
+			}
+		} else if (!pitchPanCtr.equals(other.pitchPanCtr)) {
+			return false;
+		}
+		if (pitchPanSep == null) {
+			if (other.pitchPanSep != null) {
+				return false;
+			}
+		} else if (!pitchPanSep.equals(other.pitchPanSep)) {
+			return false;
+		}
+		if (randPan == null) {
+			if (other.randPan != null) {
+				return false;
+			}
+		} else if (!randPan.equals(other.randPan)) {
+			return false;
+		}
+		if (randVol == null) {
+			if (other.randVol != null) {
+				return false;
+			}
+		} else if (!randVol.equals(other.randVol)) {
+			return false;
+		}
+		if (volEnv == null) {
+			if (other.volEnv != null) {
+				return false;
+			}
+		} else if (!volEnv.equals(other.volEnv)) {
+			return false;
+		}
+		return true;
+	}
+	
 }
