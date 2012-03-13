@@ -43,6 +43,7 @@ public class ITInstrument {
 	public final int pitchPanCtr;
 	public final int globalVol;
 	public final int defaultPan;
+	public final boolean defaultPanEnabled;
 	public final int randVol;
 	public final int randPan;
 	
@@ -73,7 +74,7 @@ public class ITInstrument {
 	
 	public ITInstrument(String filename, String instrumentName, NNA nna,
             DCT dct, DCA dca, int fadeOut, int pitchPanSep, int pitchPanCtr,
-            int globalVol, int defaultPan, int randVol, int randPan,
+            int globalVol, int defaultPan, boolean defaultPanEnabled, int randVol, int randPan,
             int filterCutoff, int filterRes, int midiChan, int midiPgm,
             int midiBnk, List<NoteSamplePair> noteSampleMap,
             ITVolumeEnvelope volEnv, ITPanEnvelope panEnv,
@@ -90,6 +91,7 @@ public class ITInstrument {
         this.pitchPanCtr = pitchPanCtr;
         this.globalVol = globalVol;
         this.defaultPan = defaultPan;
+        this.defaultPanEnabled = defaultPanEnabled;
         this.randVol = randVol;
         this.randPan = randPan;
         this.filterCutoff = filterCutoff;
@@ -113,7 +115,7 @@ public class ITInstrument {
 	
     public ITInstrument() {
         // TODO: Figure out correct values for pitch-pan ctr, and initial filter settings
-		this("", "", NNA.Cut, DCT.Off, DCA.Cut, 0, 0, 0, 128, 0x80, 0, 0, 255, 0, 0, 0, 0, emptyNoteSampleMap(), null, null, null);
+		this("", "", NNA.Cut, DCT.Off, DCA.Cut, 0, 0, 0, 128, 0, false, 0, 0, 255, 0, 0, 0, 0, emptyNoteSampleMap(), null, null, null);
 	}
 	
 	public static ITInstrument newFromData(byte data[], int offs) {
@@ -129,6 +131,7 @@ public class ITInstrument {
 	    int pitchPanCtr;
 	    int globalVol;
 	    int defaultPan;
+	    boolean defaultPanEnabled;
 	    int randVol;
 	    int randPan;
 	    
@@ -174,7 +177,9 @@ public class ITInstrument {
 		pitchPanSep = (int)data[offs++];
 		pitchPanCtr = 0xff & data[offs++];
 		globalVol = 0xff & data[offs++];
-		defaultPan = 0xff & data[offs++];
+		defaultPan = 0x7f & data[offs];
+		defaultPanEnabled = (0x80 & data[offs]) == 0;
+		offs++;
 		randVol = 0xff & data[offs++];
 		randPan = 0xff & data[offs++];
 		offs += 4;
@@ -214,7 +219,7 @@ public class ITInstrument {
 		offs += 0x52;
 		pitchEnv = ITPitchEnvelope.newFromData(data, offs);
 		
-        return new ITInstrument(filename, instrumentName, nna, dct, dca, fadeOut, pitchPanSep, pitchPanCtr, globalVol, defaultPan, randVol, randPan,
+        return new ITInstrument(filename, instrumentName, nna, dct, dca, fadeOut, pitchPanSep, pitchPanCtr, globalVol, defaultPan, defaultPanEnabled, randVol, randPan,
                 filterCutoff, filterRes, midiChan, midiPgm, midiBnk, noteSampleMap, volEnv, panEnv, pitchEnv);
 	}
 
