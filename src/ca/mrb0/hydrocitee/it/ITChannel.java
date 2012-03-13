@@ -1,7 +1,7 @@
 package ca.mrb0.hydrocitee.it;
 
 public class ITChannel {
-	int pan, vol;
+	public final int pan, vol;
 
 	public ITChannel(int pan, int vol) {
 		super();

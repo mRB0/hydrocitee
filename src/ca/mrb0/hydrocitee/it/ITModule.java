@@ -14,16 +14,28 @@ public class ITModule {
 
 	private static Logger l = Logger.getLogger(ITModule.class);
 
-	public final Prop<SongValues> songSettings = new Prop<SongValues>();
-	public final Prop<List<Integer>> orders = new Prop<List<Integer>>();
+	public final SongValues songSettings; // 
+	public final List<Integer> orders; // 
 	
-	public final Prop<String> songMessage = new Prop<String>("");
-	public final Prop<List<ITChannel>> channels = new Prop<List<ITChannel>>(List.<ITChannel>list());
-	public final Prop<List<ITInstrument>> instruments = new Prop<List<ITInstrument>>();
-			
-	public static ITModule newFromInputStream(InputStream is) throws IOException {
-		ITModule mod = new ITModule();
-		
+	public final String songMessage; // ""
+	public final List<ITChannel> channels; // List.<ITChannel>list()
+	
+	public final List<ITInstrument> instruments; // 
+	
+	
+	public ITModule(SongValues songSettings, List<Integer> orders,
+            String songMessage, List<ITChannel> channels,
+            List<ITInstrument> instruments) {
+        super();
+        this.songSettings = songSettings;
+        this.orders = orders;
+        this.songMessage = songMessage;
+        this.channels = channels;
+        this.instruments = instruments;
+    }
+
+
+    public static ITModule newFromInputStream(InputStream is) throws IOException {
 		byte impm[] = new byte[4];
 		
 		if (is.read(impm) != impm.length || !Arrays.equals(impm, new byte[] { 'I', 'M', 'P', 'M' })) {
@@ -81,20 +93,21 @@ public class ITModule {
 		int msglen = Streams.unpack16(params, 24);
 		long msgoffs = Streams.unpack32(params, 26);
 		
-		mod.songSettings.set(new SongValues(songName, cwt_major, cwt_minor, cmwt_major, cmwt_minor, stereo, instruments, linear, oldfx, linked, gv, mv, speed, tempo, sep));
+		SongValues songValues = new SongValues(songName, cwt_major, cwt_minor, cmwt_major, cmwt_minor, stereo, instruments, linear, oldfx, linked, gv, mv, speed, tempo, sep);
 		
 		int channelPans[] = Streams.readByteBlock(is, 64);
 		int channelVols[] = Streams.readByteBlock(is, 64);
 		
-		mod.channels.set(List.<ITChannel>list());
+		List<ITChannel> channels = List.<ITChannel>list();
 		for(int i = 0; i < 64; i++) {
-			mod.channels.set(mod.channels.get().snoc(new ITChannel(channelPans[i], channelVols[i])));
+			channels = channels.snoc(new ITChannel(channelPans[i], channelVols[i]));
 		}
 		
+		
 		int orders[] = Streams.readByteBlock(is, ordnum);
-		mod.orders.set(List.<Integer>list());
+		List<Integer> orderList = List.<Integer>list();
 		for(int i = 0; i < orders.length; i++) {
-			mod.orders.set(mod.orders.get().snoc(orders[i]));
+			orderList = orderList.snoc(orders[i]);
 		}
 		
 		long insOffsets[] = Streams.readLongBlock(is, insnum);
@@ -116,6 +129,7 @@ public class ITModule {
 			}
 		}
 		
+		String message = null;
 		if (hasMessage) {
 			int offs = (int)(msgoffs - startOffset);
 			
@@ -129,25 +143,22 @@ public class ITModule {
 					msgdata[i] = "\n".getBytes("windows-1252")[0];
 				}
 			}
-			mod.songMessage.set(new String(Arrays.copyOf(msgdata, nul), "windows-1252"));
+			message = new String(Arrays.copyOf(msgdata, nul), "windows-1252");
 		}
 		
 		// load instruments
 		
-		mod.instruments.set(List.<ITInstrument>list());
+		List<ITInstrument> instrumentList = List.<ITInstrument>list();
 		for(int i = 0; i < insOffsets.length; i++) {
-			mod.instruments.set(mod.instruments.get().snoc(ITInstrument.newFromData(contents, (int)(insOffsets[i] - startOffset))));
+			instrumentList = instrumentList.snoc(ITInstrument.newFromData(contents, (int)(insOffsets[i] - startOffset)));
 		}
 		
-		mod.freeze();
-		return mod;
+		// load samples
+		
+		
+		
+		return new ITModule(songValues, orderList, message, channels, instrumentList);
+		
 	}
 	
-	private void freeze() {
-		songSettings.freeze();
-		orders.freeze();
-		songMessage.freeze();
-		channels.freeze();
-		instruments.freeze();
-	}
 }
