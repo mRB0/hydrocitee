@@ -6,7 +6,6 @@ import java.util.Arrays;
 
 import org.apache.log4j.Logger;
 
-import ca.mrb0.hydrocitee.util.Prop;
 import ca.mrb0.hydrocitee.util.Streams;
 import fj.data.List;
 
@@ -155,6 +154,10 @@ public class ITModule {
 		
 		// load samples
 		
+        List<ITSample> sampleList = List.<ITSample>list();
+        for(int i = 0; i < smpOffsets.length; i++) {
+            sampleList = sampleList.snoc(ITSample.newFromData(contents, (int)(insOffsets[i] - startOffset), (int)startOffset, cwt_major, cwt_minor));
+        }
 		
 		
 		return new ITModule(songValues, orderList, message, channels, instrumentList);
