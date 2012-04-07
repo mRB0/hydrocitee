@@ -87,7 +87,7 @@ public class ITSample {
         this("", "", 64, 64, false, false, false, false, false, false, 0, 0, 0, 0, 8363, 0, 0, 0, VibratoWaveform.Sine, false, 0, new ITSampleData());
     }
     
-    public static ITSample newFromData(byte data[], int offs, int fileOffsAdj, int cwt_major, int cwt_minor) {
+    public static ITSample newFromData(byte data[], int offs, int fileOffsAdj) {
         String filename;
         String sampleName;
         
@@ -200,11 +200,10 @@ public class ITSample {
         vibrRate = 0xff & data[offs++];
         vibrWaveform = VibratoWaveform.values()[0xff & data[offs++]];
         
-        // TODO: Load sample and decompress if necessary
         if (hasSampleData) {
             CompressionType ctype;
             if (isCompressed) {
-                if (cwt_major == 2 && cwt_minor >= 15) {
+                if ((cvt & 0x04) != 0) {
                     ctype = CompressionType.IT215;
                 } else {
                     ctype = CompressionType.IT214;
@@ -212,6 +211,8 @@ public class ITSample {
             } else {
                 ctype = CompressionType.Uncompressed;
             }
+            
+            l.debug(String.format("Load sample data: %s, compression=%s, %d-bit", sampleName, ctype.toString(), _16bit ? 16 : 8));
             sampleData = ITSampleData.newFromData(data, (int)sampleOffset, (int)dataLengthSamples, _16bit, ctype);
         } else {
             sampleData = null;
