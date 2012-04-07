@@ -156,7 +156,7 @@ public class ITModule {
 		
         List<ITSample> sampleList = List.<ITSample>list();
         for(int i = 0; i < smpOffsets.length; i++) {
-            sampleList = sampleList.snoc(ITSample.newFromData(contents, (int)(insOffsets[i] - startOffset), (int)startOffset, cwt_major, cwt_minor));
+            sampleList = sampleList.snoc(ITSample.newFromData(contents, (int)(smpOffsets[i] - startOffset), (int)startOffset));
         }
 		
 		

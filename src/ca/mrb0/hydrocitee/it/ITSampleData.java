@@ -1,11 +1,22 @@
 package ca.mrb0.hydrocitee.it;
 
+import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
+/**
+ * TODO: Find a much better (more efficient) way to store/access sample data
+ * 
+ * @author mrb
+ *
+ */
 public class ITSampleData {
     private static Logger l = Logger.getLogger(ITSampleData.class);
     
@@ -50,6 +61,21 @@ public class ITSampleData {
     
     public static ITSampleData newFromData(byte data[], int offs, int dataLengthSamples, boolean is16Bit, CompressionType compressionType) {
         
-        return null;
+        final int[] outData;
+        
+        if (compressionType != CompressionType.Uncompressed) {
+            outData = ITSampleDataDecompressor.decompressSample(data, offs, dataLengthSamples, is16Bit, compressionType);
+        } else {
+            outData = new int[dataLengthSamples];
+            for(int i = 0; i < dataLengthSamples; i++) {
+                if (is16Bit) {
+                    outData[i] = ((0xff & data[offs + 2 * i + 1]) << 8) | (0xff & data[offs + 2 * i]); 
+                } else {
+                    outData[i] = 0xff & data[offs + i];
+                }
+            }
+        }
+        
+        return new ITSampleData(outData);
     }
 }
