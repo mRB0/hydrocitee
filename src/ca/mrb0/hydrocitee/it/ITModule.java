@@ -2,12 +2,15 @@ package ca.mrb0.hydrocitee.it;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import ca.mrb0.hydrocitee.util.Streams;
-import fj.data.List;
+
+import com.google.common.collect.ImmutableList;
 
 public class ITModule {
 
@@ -27,10 +30,10 @@ public class ITModule {
             List<ITInstrument> instruments) {
         super();
         this.songSettings = songSettings;
-        this.orders = orders;
+        this.orders = ImmutableList.copyOf(orders);
         this.songMessage = songMessage;
-        this.channels = channels;
-        this.instruments = instruments;
+        this.channels = ImmutableList.copyOf(channels);
+        this.instruments = ImmutableList.copyOf(instruments);
     }
 
 
@@ -97,16 +100,16 @@ public class ITModule {
 		int channelPans[] = Streams.readByteBlock(is, 64);
 		int channelVols[] = Streams.readByteBlock(is, 64);
 		
-		List<ITChannel> channels = List.<ITChannel>list();
+		List<ITChannel> channels = new ArrayList<ITChannel>(64);
 		for(int i = 0; i < 64; i++) {
-			channels = channels.snoc(new ITChannel(channelPans[i], channelVols[i]));
+			channels.add(new ITChannel(channelPans[i], channelVols[i]));
 		}
 		
 		
 		int orders[] = Streams.readByteBlock(is, ordnum);
-		List<Integer> orderList = List.<Integer>list();
+		List<Integer> orderList = new ArrayList<Integer>(orders.length);
 		for(int i = 0; i < orders.length; i++) {
-			orderList = orderList.snoc(orders[i]);
+			orderList.add(orders[i]);
 		}
 		
 		long insOffsets[] = Streams.readLongBlock(is, insnum);
@@ -147,16 +150,16 @@ public class ITModule {
 		
 		// load instruments
 		
-		List<ITInstrument> instrumentList = List.<ITInstrument>list();
+		List<ITInstrument> instrumentList = new ArrayList<ITInstrument>(insOffsets.length);
 		for(int i = 0; i < insOffsets.length; i++) {
-			instrumentList = instrumentList.snoc(ITInstrument.newFromData(contents, (int)(insOffsets[i] - startOffset)));
+			instrumentList.add(ITInstrument.newFromData(contents, (int)(insOffsets[i] - startOffset)));
 		}
 		
 		// load samples
 		
-        List<ITSample> sampleList = List.<ITSample>list();
+        List<ITSample> sampleList = new ArrayList<ITSample>(smpOffsets.length);
         for(int i = 0; i < smpOffsets.length; i++) {
-            sampleList = sampleList.snoc(ITSample.newFromData(contents, (int)(smpOffsets[i] - startOffset), (int)startOffset));
+            sampleList.add(ITSample.newFromData(contents, (int)(smpOffsets[i] - startOffset), (int)startOffset));
         }
 		
 		

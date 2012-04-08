@@ -1,8 +1,12 @@
 package ca.mrb0.hydrocitee.it;
 
-import fj.data.List;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Callable;
 
-public class ITEnvelope {
+import com.google.common.collect.ImmutableList;
+
+public abstract class ITEnvelope {
 	public final boolean enabled;
 	public final boolean loop;
 	public final boolean susloop;
@@ -25,10 +29,10 @@ public class ITEnvelope {
         this.loopEnd = loopEnd;
         this.susloopBegin = susloopBegin;
         this.susloopEnd = susloopEnd;
-        this.nodes = nodes;
+        this.nodes = ImmutableList.copyOf(nodes);
     }
 
-    protected static ITEnvelope newFromData(byte data[], int offs) {
+    protected static ITEnvelope newFromData(byte data[], int offs, EnvelopeConstructor ctor) {
         boolean enabled;
         boolean loop;
         boolean susloop;
@@ -47,14 +51,15 @@ public class ITEnvelope {
 		susloop = (flags & 0x3) != 0;
 		
 		int numPoints = 0xff & data[offs++];
-		nodes = List.<NodePoint>replicate(numPoints, null);
+		
+		nodes = ctor.loadNodes(numPoints);
 		
 		loopBegin = 0xff & data[offs++];
 		loopEnd = 0xff & data[offs++];
 		susloopBegin = 0xff & data[offs++];
 		susloopEnd = 0xff & data[offs++];
 		
-		return new ITEnvelope(enabled, loop, susloop, loopBegin, loopEnd, susloopBegin, susloopEnd, nodes);
+		return ctor.construct(enabled, loop, susloop, loopBegin, loopEnd, susloopBegin, susloopEnd, nodes);
 	}
 
 	public static class NodePoint {
@@ -127,4 +132,11 @@ public class ITEnvelope {
     }
 	
 	
+    protected static interface EnvelopeConstructor {
+        public List<NodePoint> loadNodes(int count);
+        public ITEnvelope construct(boolean enabled, boolean loop, boolean susloop,
+                int loopBegin, int loopEnd, int susloopBegin, int susloopEnd,
+                List<NodePoint> nodes);
+    }
+    
 }
