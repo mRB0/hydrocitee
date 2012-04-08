@@ -1,12 +1,16 @@
 package ca.mrb0.hydrocitee.it;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.collect.ImmutableList;
+
 import ca.mrb0.hydrocitee.util.Streams;
-import fj.data.List;
 
 public class ITInstrument {
 	private static Logger l = Logger.getLogger(ITInstrument.class);
@@ -99,23 +103,23 @@ public class ITInstrument {
         this.midiChan = midiChan;
         this.midiPgm = midiPgm;
         this.midiBnk = midiBnk;
-        this.noteSampleMap = noteSampleMap;
+        this.noteSampleMap = ImmutableList.copyOf(noteSampleMap);
         this.volEnv = volEnv;
         this.panEnv = panEnv;
         this.pitchEnv = pitchEnv;
     }
 
     private static List<NoteSamplePair> emptyNoteSampleMap() {
-        List<NoteSamplePair> nsmap = List.<NoteSamplePair> list();
+        List<NoteSamplePair> nsmap = new ArrayList<NoteSamplePair>(120);
         for (int i = 0; i < 120; i++) {
-            nsmap = nsmap.snoc(new NoteSamplePair(i, 0));
+            nsmap.add(new NoteSamplePair(i, 0));
         }
-        return nsmap;
+        return ImmutableList.copyOf(nsmap);
     }
 	
     public ITInstrument() {
         // TODO: Figure out correct values for pitch-pan ctr, and initial filter settings
-		this("", "", NNA.Cut, DCT.Off, DCA.Cut, 0, 0, 0, 128, 0, false, 0, 0, 255, 0, 0, 0, 0, emptyNoteSampleMap(), null, null, null);
+		this("", "", NNA.Cut, DCT.Off, DCA.Cut, 0, 0, 0, 128, 0, false, 0, 0, 255, 0, 0, 0, 0, ImmutableList.copyOf(emptyNoteSampleMap()), null, null, null);
 	}
 	
 	public static ITInstrument newFromData(byte data[], int offs) {
@@ -207,9 +211,9 @@ public class ITInstrument {
 		midiBnk = Streams.unpack16(data, offs);
 		offs += 2;
 		
-		noteSampleMap = List.<NoteSamplePair>list();
+		noteSampleMap = new ArrayList<NoteSamplePair>(120);
 		for(int i = 0; i < 120; i++) {
-			noteSampleMap = noteSampleMap.snoc(new NoteSamplePair(0xff & data[offs], 0xff & data[offs+1]));
+			noteSampleMap.add(new NoteSamplePair(0xff & data[offs], 0xff & data[offs+1]));
 			offs += 2;
 		}
 		
