@@ -21,10 +21,10 @@ public class ITSampleData {
         IT215
     };
     
-    private int sampleData[];
+    private int[] sampleData;
     private List<Integer> sampleDataList = null;
     
-    public ITSampleData(int sampleData[]) {
+    public ITSampleData(int[] sampleData) {
         this.sampleData = Arrays.copyOf(sampleData, sampleData.length);
     }
     
@@ -54,7 +54,7 @@ public class ITSampleData {
         return sampleData.length;
     }
     
-    public static ITSampleData newFromData(byte data[], int offs, int dataLengthSamples, boolean is16Bit, CompressionType compressionType) {
+    public static ITSampleData newFromData(byte[] data, int offs, int dataLengthSamples, boolean is16Bit, CompressionType compressionType) {
         
         final int[] outData;
         

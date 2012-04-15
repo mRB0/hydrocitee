@@ -122,7 +122,7 @@ public class ITInstrument {
 		this("", "", NNA.Cut, DCT.Off, DCA.Cut, 0, 0, 0, 128, 0, false, 0, 0, 255, 0, 0, 0, 0, ImmutableList.copyOf(emptyNoteSampleMap()), null, null, null);
 	}
 	
-	public static ITInstrument newFromData(byte data[], int offs) {
+	public static ITInstrument newFromData(byte[] data, int offs) {
 	    String filename;
 	    String instrumentName;
 	    
@@ -157,7 +157,7 @@ public class ITInstrument {
 		}
 		
 		offs += 4;
-		byte rawFilename[] = Arrays.copyOfRange(data, offs, offs + 12);
+		byte[] rawFilename = Arrays.copyOfRange(data, offs, offs + 12);
 		int nul = Streams.arrayIndexOf(rawFilename, (byte)0);
 		if (nul == -1) {
 			nul = rawFilename.length;
@@ -188,7 +188,7 @@ public class ITInstrument {
 		randPan = 0xff & data[offs++];
 		offs += 4;
 		
-		byte instname[] = Arrays.copyOfRange(data, offs, offs + 26);
+		byte[] instname = Arrays.copyOfRange(data, offs, offs + 26);
 		nul = Streams.arrayIndexOf(instname, (byte)0);
 		if (nul == -1) {
 			nul = instname.length;

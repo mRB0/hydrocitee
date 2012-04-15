@@ -32,7 +32,7 @@ public abstract class ITEnvelope {
         this.nodes = ImmutableList.copyOf(nodes);
     }
 
-    protected static ITEnvelope newFromData(byte data[], int offs, EnvelopeConstructor ctor) {
+    protected static ITEnvelope newFromData(byte[] data, int offs, EnvelopeConstructor ctor) {
         boolean enabled;
         boolean loop;
         boolean susloop;

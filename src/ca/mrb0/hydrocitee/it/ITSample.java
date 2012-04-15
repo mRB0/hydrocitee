@@ -84,7 +84,7 @@ public class ITSample {
         this("", "", 64, 64, false, false, false, false, false, false, 0, 0, 0, 0, 8363, 0, 0, 0, VibratoWaveform.Sine, false, 0, new ITSampleData());
     }
     
-    public static ITSample newFromData(byte data[], int offs, int fileOffsAdj) {
+    public static ITSample newFromData(byte[] data, int offs, int fileOffsAdj) {
         String filename;
         String sampleName;
         
@@ -120,7 +120,7 @@ public class ITSample {
         }
         offs += 4;
         
-        byte rawFilename[] = Arrays.copyOfRange(data, offs, offs + 12);
+        byte[] rawFilename = Arrays.copyOfRange(data, offs, offs + 12);
         int nul = Streams.arrayIndexOf(rawFilename, (byte)0);
         if (nul == -1) {
             nul = rawFilename.length;
@@ -151,7 +151,7 @@ public class ITSample {
         
         defaultVol = 0xff & data[offs++];
         
-        byte smpname[] = Arrays.copyOfRange(data, offs, offs + 26);
+        byte[] smpname = Arrays.copyOfRange(data, offs, offs + 26);
         nul = Streams.arrayIndexOf(smpname, (byte)0);
         if (nul == -1) {
             nul = smpname.length;
