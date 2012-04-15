@@ -16,7 +16,7 @@ public class ITSampleDataDecompressor {
 
     // Input
     
-    private byte data[];
+    private byte[] data;
     private int offs;
     private int dataLengthSamples;
     private boolean is16Bit;

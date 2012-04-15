@@ -29,7 +29,7 @@ public class ITPitchEnvelope extends ITEnvelope {
         this.isFilterEnv = isFilterEnv;
     }
 
-    public static ITPitchEnvelope newFromData(byte data[], int offs) {
+    public static ITPitchEnvelope newFromData(byte[] data, int offs) {
         return (ITPitchEnvelope) ITEnvelope.newFromData(data, offs,
                 new Constructor(data, offs));
     }
@@ -61,7 +61,7 @@ public class ITPitchEnvelope extends ITEnvelope {
     }
 
     private static final class Constructor implements EnvelopeConstructor {
-        private final byte data[];
+        private final byte[] data;
         private final int offs;
 
         protected Constructor(byte[] data, int offs) {

@@ -38,14 +38,14 @@ public class ITModule {
 
 
     public static ITModule newFromInputStream(InputStream is) throws IOException {
-		byte impm[] = new byte[4];
+		byte[] impm = new byte[4];
 		
 		if (is.read(impm) != impm.length || !Arrays.equals(impm, new byte[] { 'I', 'M', 'P', 'M' })) {
 			l.error(String.format("failed to read impm; read %c%c%c%c instead", impm[0], impm[1], impm[2], impm[3]));
 			throw new IllegalArgumentException("missing impm");
 		}
 		
-		byte songNameBytes[] = new byte[26];
+		byte[] songNameBytes = new byte[26];
 		
 		if (is.read(songNameBytes) != songNameBytes.length) {
 			throw new IllegalArgumentException("truncated reading song name");
@@ -58,7 +58,7 @@ public class ITModule {
 
 		String songName = new String(Arrays.copyOfRange(songNameBytes, 0, nul), "windows-1252");
 		
-		byte params[] = new byte[34];
+		byte[] params = new byte[34];
 		if (is.read(params) != params.length) {
 			throw new IllegalArgumentException("truncated reading song params");
 		}
@@ -97,8 +97,8 @@ public class ITModule {
 		
 		SongValues songValues = new SongValues(songName, cwt_major, cwt_minor, cmwt_major, cmwt_minor, stereo, instruments, linear, oldfx, linked, gv, mv, speed, tempo, sep);
 		
-		int channelPans[] = Streams.readByteBlock(is, 64);
-		int channelVols[] = Streams.readByteBlock(is, 64);
+		int[] channelPans = Streams.readByteBlock(is, 64);
+		int[] channelVols = Streams.readByteBlock(is, 64);
 		
 		List<ITChannel> channels = new ArrayList<ITChannel>(64);
 		for(int i = 0; i < 64; i++) {
@@ -106,21 +106,21 @@ public class ITModule {
 		}
 		
 		
-		int orders[] = Streams.readByteBlock(is, ordnum);
+		int[] orders = Streams.readByteBlock(is, ordnum);
 		List<Integer> orderList = new ArrayList<Integer>(orders.length);
 		for(int i = 0; i < orders.length; i++) {
 			orderList.add(orders[i]);
 		}
 		
-		long insOffsets[] = Streams.readLongBlock(is, insnum);
-		long smpOffsets[] = Streams.readLongBlock(is, smpnum);
-		long patOffsets[] = Streams.readLongBlock(is, patnum);
+		long[] insOffsets = Streams.readLongBlock(is, insnum);
+		long[] smpOffsets = Streams.readLongBlock(is, smpnum);
+		long[] patOffsets = Streams.readLongBlock(is, patnum);
 		
 		// get lazy and read the rest of the inputstream immediately so we can randomly address the remaining data
 		long startOffset = 0x00c0 + ordnum + (insnum * 4) + (smpnum * 4) + (patnum * 4);
-		byte contents[] = new byte[0];
+		byte[] contents = new byte[0];
 		
-		byte buf[] = new byte[2048];
+		byte[] buf = new byte[2048];
 		int read;
 		while(-1 != (read = is.read(buf))) {
 			int oldLen = contents.length;
@@ -135,7 +135,7 @@ public class ITModule {
 		if (hasMessage) {
 			int offs = (int)(msgoffs - startOffset);
 			
-			byte msgdata[] = Arrays.copyOfRange(contents, offs, offs + msglen);
+			byte[] msgdata = Arrays.copyOfRange(contents, offs, offs + msglen);
 			nul = Streams.arrayIndexOf(msgdata, (byte)0);
 			if (nul == -1) {
 				nul = msgdata.length;

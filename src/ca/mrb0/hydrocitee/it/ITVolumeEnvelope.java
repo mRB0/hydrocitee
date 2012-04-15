@@ -25,12 +25,12 @@ public class ITVolumeEnvelope extends ITEnvelope {
                 nodes);
     }
 
-    public static ITVolumeEnvelope newFromData(final byte data[], final int offs) {
+    public static ITVolumeEnvelope newFromData(final byte[] data, final int offs) {
 		return (ITVolumeEnvelope) ITEnvelope.newFromData(data, offs, new Constructor(data, offs));
 	}
     
     private static final class Constructor implements EnvelopeConstructor {
-        private final byte data[];
+        private final byte[] data;
         private final int offs;
         
         protected Constructor(byte[] data, int offs) {

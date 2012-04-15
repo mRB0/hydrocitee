@@ -26,12 +26,12 @@ public class ITPanEnvelope extends ITEnvelope {
                 nodes);
     }
 
-    public static ITPanEnvelope newFromData(byte data[], int offs) {
+    public static ITPanEnvelope newFromData(byte[] data, int offs) {
         return (ITPanEnvelope) ITEnvelope.newFromData(data, offs, new Constructor(data, offs));
     }
 
     private static final class Constructor implements EnvelopeConstructor {
-        private final byte data[];
+        private final byte[] data;
         private final int offs;
         
         protected Constructor(byte[] data, int offs) {
