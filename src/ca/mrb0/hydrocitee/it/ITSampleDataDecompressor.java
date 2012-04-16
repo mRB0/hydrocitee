@@ -1,6 +1,10 @@
 package ca.mrb0.hydrocitee.it;
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
+
+import com.google.common.collect.Lists;
 
 import ca.mrb0.hydrocitee.it.ITSampleData.CompressionType;
 
@@ -232,18 +236,18 @@ public class ITSampleDataDecompressor {
         return -1;
     }
 
-    protected static int[] decompressSample(byte[] data, int offs,
+    protected static List<Integer> decompressSample(byte[] data, int offs,
             int dataLengthSamples, boolean is16Bit,
             CompressionType compressionType) {
         
         ITSampleDataDecompressor decompressor = new ITSampleDataDecompressor(data, offs, dataLengthSamples, is16Bit, compressionType);
         
-        int[] decompressed = new int[dataLengthSamples];
+        List<Integer> decompressed = Lists.newArrayListWithCapacity(dataLengthSamples);
         int decompressedIdx = 0;
         
         int sample;
         while ((sample = decompressor.nextSample()) != -1 && decompressedIdx < dataLengthSamples) {
-            decompressed[decompressedIdx++] = sample;
+            decompressed.set(decompressedIdx++, sample);
         }
         
         if (decompressedIdx != dataLengthSamples) {

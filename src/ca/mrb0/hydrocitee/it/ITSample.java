@@ -5,6 +5,8 @@ import java.util.Arrays;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Optional;
+
 import ca.mrb0.hydrocitee.it.ITSampleData.CompressionType;
 import ca.mrb0.hydrocitee.util.Streams;
 
@@ -46,7 +48,7 @@ public class ITSample {
     public final boolean defaultPanEnabled;
     public final int defaultPan;
     
-    public final ITSampleData sampleData;
+    public final Optional<ITSampleData> sampleData;
 
     public ITSample(String filename, String sampleName, int globalVol,
             int defaultVol, boolean _16bit, boolean stereo,
@@ -54,7 +56,7 @@ public class ITSample {
             boolean susloopPingPong, long loopBegin, long loopEnd,
             long susloopBegin, long susloopEnd, long c5speed, int vibrSpeed,
             int vibrDepth, int vibrRate, VibratoWaveform vibrWaveform,
-            boolean defaultPanEnabled, int defaultPan, ITSampleData sampleData) {
+            boolean defaultPanEnabled, int defaultPan, Optional<ITSampleData> sampleData) {
         super();
         this.filename = filename;
         this.sampleName = sampleName;
@@ -77,11 +79,11 @@ public class ITSample {
         this.vibrWaveform = vibrWaveform;
         this.defaultPanEnabled = defaultPanEnabled;
         this.defaultPan = defaultPan;
-        this.sampleData = new ITSampleData();
+        this.sampleData = Optional.absent();
     }
     
     public ITSample() {
-        this("", "", 64, 64, false, false, false, false, false, false, 0, 0, 0, 0, 8363, 0, 0, 0, VibratoWaveform.Sine, false, 0, new ITSampleData());
+        this("", "", 64, 64, false, false, false, false, false, false, 0, 0, 0, 0, 8363, 0, 0, 0, VibratoWaveform.Sine, false, 0, Optional.<ITSampleData>absent());
     }
     
     public static ITSample newFromData(byte[] data, int offs, int fileOffsAdj) {
@@ -113,7 +115,7 @@ public class ITSample {
         boolean defaultPanEnabled;
         int defaultPan;
         
-        ITSampleData sampleData;
+        Optional<ITSampleData> sampleData;
         
         if (!Arrays.equals(Arrays.copyOfRange(data, offs, offs + 4), new byte[] { 'I', 'M', 'P', 'S' })) {
             throw new IllegalArgumentException(String.format("sample at 0x%x had broken imps", offs));
@@ -210,9 +212,9 @@ public class ITSample {
             }
             
             l.debug(String.format("Load sample data: %s, compression=%s, %d-bit", sampleName, ctype.toString(), _16bit ? 16 : 8));
-            sampleData = ITSampleData.newFromData(data, (int)sampleOffset, (int)dataLengthSamples, _16bit, ctype);
+            sampleData = Optional.of(ITSampleData.newFromData(data, (int)sampleOffset, (int)dataLengthSamples, _16bit, ctype));
         } else {
-            sampleData = null;
+            sampleData = Optional.absent();
         }
         
         return new ITSample(filename, sampleName, globalVol, defaultVol, _16bit, stereo, loopEnabled, susloopEnabled, loopPingPong, susloopPingPong, loopBegin, loopEnd, susloopBegin, susloopEnd, c5speed, vibrSpeed, vibrDepth, vibrRate, vibrWaveform, defaultPanEnabled, defaultPan, sampleData);

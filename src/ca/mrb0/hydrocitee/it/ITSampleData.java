@@ -2,9 +2,14 @@ package ca.mrb0.hydrocitee.it;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 /**
  * TODO: Find a much better (more efficient) way to store/access sample data
@@ -21,52 +26,29 @@ public class ITSampleData {
         IT215
     };
     
-    private int[] sampleData;
-    private List<Integer> sampleDataList = null;
+    public final List<Integer> sampleData;
     
-    public ITSampleData(int[] sampleData) {
-        this.sampleData = Arrays.copyOf(sampleData, sampleData.length);
+    public ITSampleData(List<Integer> sampleData) {
+        this.sampleData = ImmutableList.copyOf(sampleData);
     }
     
     public ITSampleData() {
-        this(new int[0]);
-    }
-    
-    public int[] getSampleData() {
-        return Arrays.copyOf(sampleData, sampleData.length);
-    }
-    
-    public synchronized List<Integer> getSampleDataList() {
-        if (sampleDataList == null) {
-            sampleDataList = new ArrayList<Integer>(sampleData.length);
-            for (int i = 0; i < sampleData.length; i++) {
-                sampleDataList.set(i, sampleData[i]);
-            }
-        }
-        return sampleDataList;
-    }
-    
-    public int get(int idx) {
-        return sampleData[idx];
-    }
-    
-    public int size() {
-        return sampleData.length;
+        this(ImmutableList.<Integer>of());
     }
     
     public static ITSampleData newFromData(byte[] data, int offs, int dataLengthSamples, boolean is16Bit, CompressionType compressionType) {
         
-        final int[] outData;
+        final List<Integer> outData;
         
         if (compressionType != CompressionType.Uncompressed) {
             outData = ITSampleDataDecompressor.decompressSample(data, offs, dataLengthSamples, is16Bit, compressionType);
         } else {
-            outData = new int[dataLengthSamples];
+            outData = Lists.newArrayListWithCapacity(dataLengthSamples);
             for(int i = 0; i < dataLengthSamples; i++) {
                 if (is16Bit) {
-                    outData[i] = ((0xff & data[offs + 2 * i + 1]) << 8) | (0xff & data[offs + 2 * i]); 
+                    outData.set(i, ((0xff & data[offs + 2 * i + 1]) << 8) | (0xff & data[offs + 2 * i])); 
                 } else {
-                    outData[i] = 0xff & data[offs + i];
+                    outData.set(i, 0xff & data[offs + i]);
                 }
             }
         }
