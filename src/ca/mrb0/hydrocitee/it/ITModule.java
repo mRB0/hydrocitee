@@ -23,17 +23,22 @@ public class ITModule {
 	public final List<ITChannel> channels; // List.<ITChannel>list()
 	
 	public final List<ITInstrument> instruments; // 
+	public final List<ITSample> samples; // 
+	public final List<ITPattern> patterns; // 
 	
 	
 	public ITModule(SongValues songSettings, List<Integer> orders,
             String songMessage, List<ITChannel> channels,
-            List<ITInstrument> instruments) {
+            List<ITInstrument> instruments, List<ITSample> samples,
+            List<ITPattern> patterns) {
         super();
         this.songSettings = songSettings;
         this.orders = ImmutableList.copyOf(orders);
         this.songMessage = songMessage;
         this.channels = ImmutableList.copyOf(channels);
         this.instruments = ImmutableList.copyOf(instruments);
+        this.samples = ImmutableList.copyOf(samples);
+        this.patterns = ImmutableList.copyOf(patterns);
     }
 
 
@@ -150,20 +155,30 @@ public class ITModule {
 		
 		// load instruments
 		
-		List<ITInstrument> instrumentList = new ArrayList<ITInstrument>(insOffsets.length);
+		ImmutableList.Builder<ITInstrument> instrumentList = ImmutableList.builder();
 		for(int i = 0; i < insOffsets.length; i++) {
 			instrumentList.add(ITInstrument.newFromData(contents, (int)(insOffsets[i] - startOffset)));
 		}
 		
 		// load samples
 		
-        List<ITSample> sampleList = new ArrayList<ITSample>(smpOffsets.length);
+		ImmutableList.Builder<ITSample> sampleList = ImmutableList.builder();
         for(int i = 0; i < smpOffsets.length; i++) {
             sampleList.add(ITSample.newFromData(contents, (int)(smpOffsets[i] - startOffset), (int)startOffset));
         }
 		
+		// load patterns
+        
+        ImmutableList.Builder<ITPattern> patterns = ImmutableList.builder();
+        for(int i = 0; i < patOffsets.length; i++) {
+            if (patOffsets[i] == 0) {
+                patterns.add(new ITPattern(64));
+            } else {
+                patterns.add(ITPattern.newFromData(contents, (int)(patOffsets[i] - startOffset)));
+            }
+        }
 		
-		return new ITModule(songValues, orderList, message, channels, instrumentList);
+		return new ITModule(songValues, orderList, message, channels, instrumentList.build(), sampleList.build(), patterns.build());
 		
 	}
 	
