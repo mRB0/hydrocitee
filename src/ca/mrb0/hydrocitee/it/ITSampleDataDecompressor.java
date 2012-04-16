@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.google.common.collect.Lists;
-
 import ca.mrb0.hydrocitee.it.ITSampleData.CompressionType;
+
+import com.google.common.collect.Lists;
 
 /**
  * Sample data decompression algo from SchismTracker / Cubic Player / Modplug,

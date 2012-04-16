@@ -27,7 +27,7 @@ public class ITPanEnvelope extends ITEnvelope {
     }
 
     public static ITPanEnvelope newFromData(byte[] data, int offs) {
-        return (ITPanEnvelope) ITEnvelope.newFromData(data, offs, new Constructor(data, offs));
+        return (ITPanEnvelope) ITEnvelope.newEnvelopeFromData(data, offs, new Constructor(data, offs));
     }
 
     private static final class Constructor implements EnvelopeConstructor {
