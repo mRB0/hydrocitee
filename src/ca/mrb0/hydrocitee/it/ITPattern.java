@@ -46,7 +46,7 @@ public class ITPattern {
         int[] masks = new int[64];
         int[] lastNotes = new int[64];
         int[] lastInstruments = new int[64];
-        int[] lastVolumes = new int[64];
+        VolumeColumnEntry[] lastVolumes = new VolumeColumnEntry[64];
         int[] lastEffects = new int[64];
         int[] lastEffArgs = new int[64];
 
@@ -73,7 +73,7 @@ public class ITPattern {
 
             Optional<Integer> note = Optional.absent();
             Optional<Integer> instrument = Optional.absent();
-            Optional<Integer> volume = Optional.absent();
+            Optional<VolumeColumnEntry> volume = Optional.absent();
             Optional<Integer> effect = Optional.absent();
             Optional<Integer> effectArg = Optional.absent();
 
@@ -88,8 +88,10 @@ public class ITPattern {
             }
 
             if ((mask & 4) != 0) {
-                volume = Optional.of(data[offs++] & 0xff);
-                lastVolumes[channel] = volume.get();
+                int v = data[offs++] & 0xff;
+                VolumeColumnEntry entry = ITNoteEntry.volumeFromPatternValue(v);
+                volume = Optional.of(entry);
+                lastVolumes[channel] = entry;
             }
 
             if ((mask & 8) != 0) {

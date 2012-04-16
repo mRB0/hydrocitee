@@ -1,21 +1,25 @@
 package ca.mrb0.hydrocitee.it;
 
+import ca.mrb0.hydrocitee.it.AbstractVolumeColumnEntry.Effect;
+import ca.mrb0.hydrocitee.it.AbstractVolumeColumnEntry.Panning;
+import ca.mrb0.hydrocitee.it.AbstractVolumeColumnEntry.Volume;
+
 import com.google.common.base.Optional;
 
 public class ITNoteEntry {
     public final Optional<Integer> note;
     public final Optional<Integer> instrument;
-    public final Optional<Integer> volume;
+    public final Optional<VolumeColumnEntry> volume;
     public final Optional<Integer> effect;
     public final Optional<Integer> effectArg;
 
     public static final ITNoteEntry emptyNote = new ITNoteEntry(
             Optional.<Integer> absent(), Optional.<Integer> absent(),
-            Optional.<Integer> absent(), Optional.<Integer> absent(),
+            Optional.<VolumeColumnEntry> absent(), Optional.<Integer> absent(),
             Optional.<Integer> absent());
 
     public ITNoteEntry(Optional<Integer> note, Optional<Integer> instrument,
-            Optional<Integer> volume, Optional<Integer> effect,
+            Optional<VolumeColumnEntry> volume, Optional<Integer> effect,
             Optional<Integer> effectArg) {
         super();
         this.note = note;
@@ -57,25 +61,7 @@ public class ITNoteEntry {
         builder.append(" ");
         
         if (volume.isPresent()) {
-            int vol = volume.get();
-            if (vol <= 64) {
-                builder.append(String.format("v%02d", vol));
-            } else if (vol <= 124 || vol >= 193) {
-                int ltrP, val;
-                if (vol <= 124) {
-                    ltrP = (vol - 65) / 10;
-                    val = (vol - 65) % 10;
-                } else {
-                    ltrP = ((vol - 193) / 10) + 6;
-                    val = (vol - 193) % 10;
-                }
-                char ltr = (char)((int)'A' + ltrP);
-                builder.append(String.format(" %c%d", ltr, val));
-            } else if (vol >= 128 && vol <= 192) {
-                builder.append(String.format("p%02d", vol - 192));
-            } else {
-                builder.append(String.format("%02X?", vol));
-            }
+            builder.append(volume.get().toString());
         } else {
             builder.append("...");
         }
@@ -85,6 +71,26 @@ public class ITNoteEntry {
         builder.append(effectArg.isPresent() ? String.format("%02X", effectArg.get()) : "..");
         
         return builder.toString();
+    }
+
+    public static VolumeColumnEntry volumeFromPatternValue(int n) {
+        if (n <= 64) {
+            return new Volume(n);
+        } else if (n <= 124 || n >= 193) {
+            int effNum, val;
+            if (n <= 124) {
+                effNum = (n - 65) / 10;
+                val = (n - 65) % 10;
+            } else {
+                effNum = ((n - 193) / 10) + 6;
+                val = (n - 193) % 10;
+            }
+            return new Effect(effNum, val);
+        } else if (n >= 128 && n <= 192) {
+            return new Panning(n - 192);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -151,4 +157,5 @@ public class ITNoteEntry {
         return true;
     }
 
+    
 }
