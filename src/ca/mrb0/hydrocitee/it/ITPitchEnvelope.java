@@ -30,7 +30,7 @@ public class ITPitchEnvelope extends ITEnvelope {
     }
 
     public static ITPitchEnvelope newFromData(byte[] data, int offs) {
-        return (ITPitchEnvelope) ITEnvelope.newFromData(data, offs,
+        return (ITPitchEnvelope) ITEnvelope.newEnvelopeFromData(data, offs,
                 new Constructor(data, offs));
     }
 
