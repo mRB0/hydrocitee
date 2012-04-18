@@ -42,9 +42,9 @@ public class ITSampleData {
             outData = Lists.newArrayListWithCapacity(dataLengthSamples);
             for(int i = 0; i < dataLengthSamples; i++) {
                 if (is16Bit) {
-                    outData.set(i, ((0xff & data[offs + 2 * i + 1]) << 8) | (0xff & data[offs + 2 * i])); 
+                    outData.add(((0xff & data[offs + 2 * i + 1]) << 8) | (0xff & data[offs + 2 * i])); 
                 } else {
-                    outData.set(i, 0xff & data[offs + i]);
+                    outData.add(0xff & data[offs + i]);
                 }
             }
         }
