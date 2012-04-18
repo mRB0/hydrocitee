@@ -12,7 +12,7 @@ class MutablePlaybackState implements ITPlaybackState {
     int pattern, row;
     int tick;
     double sample;
-    double sampleRate;
+    int sampleRate;
     
     List<MutableChannelState> channels;
 
@@ -71,7 +71,7 @@ class MutablePlaybackState implements ITPlaybackState {
     }
 
     @Override
-    public double sampleRate() {
+    public int sampleRate() {
         return sampleRate;
     }
 

@@ -10,7 +10,9 @@ public class ITPlayer {
         this.state = new MutablePlaybackState(initialState);
     }
     
-    
+    public int getSamples(int[] outBuf, int offs, int len) {
+        return 0;
+    }
 
     // public ITPlaybackState getState() { return new ITPlaybackStateSnapshot... }
 

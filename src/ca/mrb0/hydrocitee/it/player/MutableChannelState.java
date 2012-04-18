@@ -42,7 +42,7 @@ class MutableChannelState implements ITPlaybackState.ChannelState {
 
     @Override
     public List<VirtualChannelState> virtualChannels() {
-        // TODO: Return a list of VirtualChannelStateSnapshots
+        // TODO: Return a list of VirtualChannelStateSnapshots?
         return ImmutableList.<VirtualChannelState>copyOf(vchans);
     }
     
