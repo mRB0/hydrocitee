@@ -17,7 +17,7 @@ public interface ITPlaybackState {
     public int tick();
     public double sample();
     
-    public double sampleRate();
+    public int sampleRate();
     
     public ChannelState channelState(int channel);
     
