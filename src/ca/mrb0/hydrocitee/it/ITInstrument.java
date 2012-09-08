@@ -13,70 +13,70 @@ import com.google.common.collect.ImmutableList;
 import ca.mrb0.hydrocitee.util.Streams;
 
 public class ITInstrument {
-	private static Logger l = Logger.getLogger(ITInstrument.class);
-	
-	public enum NNA {
-		Cut,
-		Continue,
-		NoteOff,
-		NoteFade
-	};
-	
-	public enum DCT {
-		Off,
-		Note,
-		Sample,
-		Instrument
-	};
-	
-	public enum DCA {
-		Cut,
-		NoteOff,
-		NoteFade
-	};
-	
-	public final String filename;
-	public final String instrumentName;
-	
-	public final NNA nna;
-	public final DCT dct;
-	public final DCA dca;
-	
-	public final int fadeOut;
-	public final int pitchPanSep;
-	public final int pitchPanCtr;
-	public final int globalVol;
-	public final int defaultPan;
-	public final boolean defaultPanEnabled;
-	public final int randVol;
-	public final int randPan;
-	
-	public final int filterCutoff;
-	public final int filterRes;
-	
-	public final int midiChan;
-	public final int midiPgm;
-	public final int midiBnk;
-	
-	public final List<NoteSamplePair> noteSampleMap;
-	
-	public final ITVolumeEnvelope volEnv; 
-	public final ITPanEnvelope panEnv; 
-	public final ITPitchEnvelope pitchEnv; 
-	
-	public static class NoteSamplePair {
-		public final int targetNote;
-		public final int sample;
-		
-		public NoteSamplePair(int note, int sample) {
-			super();
-			this.targetNote = note;
-			this.sample = sample;
-		}
-	}
-	
-	
-	public ITInstrument(String filename, String instrumentName, NNA nna,
+    private static Logger l = Logger.getLogger(ITInstrument.class);
+    
+    public enum NNA {
+        Cut,
+        Continue,
+        NoteOff,
+        NoteFade
+    };
+    
+    public enum DCT {
+        Off,
+        Note,
+        Sample,
+        Instrument
+    };
+    
+    public enum DCA {
+        Cut,
+        NoteOff,
+        NoteFade
+    };
+    
+    public final String filename;
+    public final String instrumentName;
+    
+    public final NNA nna;
+    public final DCT dct;
+    public final DCA dca;
+    
+    public final int fadeOut;
+    public final int pitchPanSep;
+    public final int pitchPanCtr;
+    public final int globalVol;
+    public final int defaultPan;
+    public final boolean defaultPanEnabled;
+    public final int randVol;
+    public final int randPan;
+    
+    public final int filterCutoff;
+    public final int filterRes;
+    
+    public final int midiChan;
+    public final int midiPgm;
+    public final int midiBnk;
+    
+    public final List<NoteSamplePair> noteSampleMap;
+    
+    public final ITVolumeEnvelope volEnv; 
+    public final ITPanEnvelope panEnv; 
+    public final ITPitchEnvelope pitchEnv; 
+    
+    public static class NoteSamplePair {
+        public final int targetNote;
+        public final int sample;
+        
+        public NoteSamplePair(int note, int sample) {
+            super();
+            this.targetNote = note;
+            this.sample = sample;
+        }
+    }
+    
+    
+    public ITInstrument(String filename, String instrumentName, NNA nna,
             DCT dct, DCA dca, int fadeOut, int pitchPanSep, int pitchPanCtr,
             int globalVol, int defaultPan, boolean defaultPanEnabled, int randVol, int randPan,
             int filterCutoff, int filterRes, int midiChan, int midiPgm,
@@ -116,116 +116,116 @@ public class ITInstrument {
         }
         return ImmutableList.copyOf(nsmap);
     }
-	
+    
     public ITInstrument() {
         // TODO: Figure out correct values for pitch-pan ctr, and initial filter settings
-		this("", "", NNA.Cut, DCT.Off, DCA.Cut, 0, 0, 0, 128, 0, false, 0, 0, 255, 0, 0, 0, 0, ImmutableList.copyOf(emptyNoteSampleMap()), null, null, null);
-	}
-	
-	public static ITInstrument newFromData(byte[] data, int offs) {
-	    String filename;
-	    String instrumentName;
-	    
-	    NNA nna;
-	    DCT dct;
-	    DCA dca;
-	    
-	    int fadeOut;
-	    int pitchPanSep;
-	    int pitchPanCtr;
-	    int globalVol;
-	    int defaultPan;
-	    boolean defaultPanEnabled;
-	    int randVol;
-	    int randPan;
-	    
-	    int filterCutoff;
-	    int filterRes;
-	    
-	    int midiChan;
-	    int midiPgm;
-	    int midiBnk;
-	    
-	    List<NoteSamplePair> noteSampleMap;
-	    
-	    ITVolumeEnvelope volEnv; 
-	    ITPanEnvelope panEnv; 
-	    ITPitchEnvelope pitchEnv; 
-		
-		if (!Arrays.equals(Arrays.copyOfRange(data, offs, offs + 4), new byte[] { 'I', 'M', 'P', 'I' })) {
-			throw new IllegalArgumentException(String.format("instrument at 0x%x had broken impi", offs));
-		}
-		
-		offs += 4;
-		byte[] rawFilename = Arrays.copyOfRange(data, offs, offs + 12);
-		int nul = Streams.arrayIndexOf(rawFilename, (byte)0);
-		if (nul == -1) {
-			nul = rawFilename.length;
-		}
-		rawFilename = Arrays.copyOfRange(rawFilename, 0, nul);
-		try {
-			filename = new String(rawFilename, "windows-1252");
-		} catch(UnsupportedEncodingException e) {
-			// hopefully shouldn't happen as we are using a hardcoded encoding
-			l.error("Unsupported encoding: " + e.toString());
-			throw new RuntimeException(e);
-		}
-		
-		offs += 12;
-		offs++;
-		nna = NNA.values()[0xff & data[offs++]];
-		dct = DCT.values()[0xff & data[offs++]];
-		dca = DCA.values()[0xff & data[offs++]];
-		fadeOut = Streams.unpack16(data, offs);
-		offs += 2;
-		pitchPanSep = (int)data[offs++];
-		pitchPanCtr = 0xff & data[offs++];
-		globalVol = 0xff & data[offs++];
-		defaultPan = 0x7f & data[offs];
-		defaultPanEnabled = (0x80 & data[offs]) == 0;
-		offs++;
-		randVol = 0xff & data[offs++];
-		randPan = 0xff & data[offs++];
-		offs += 4;
-		
-		byte[] instname = Arrays.copyOfRange(data, offs, offs + 26);
-		nul = Streams.arrayIndexOf(instname, (byte)0);
-		if (nul == -1) {
-			nul = instname.length;
-		}
-		instname = Arrays.copyOf(instname, nul);
-		try {
-			instrumentName = new String(instname, "windows-1252");
-		} catch(UnsupportedEncodingException e) {
-			// hopefully shouldn't happen as we are using a hardcoded encoding
-			l.error("Unsupported encoding: " + e.toString());
-			throw new RuntimeException(e);
-		}
-		
-		offs += 26;
-		
-		filterCutoff = 0xff & data[offs++];
-		filterRes = 0xff & data[offs++];
-		midiChan = 0xff & data[offs++];
-		midiPgm = 0xff & data[offs++];
-		midiBnk = Streams.unpack16(data, offs);
-		offs += 2;
-		
-		noteSampleMap = new ArrayList<NoteSamplePair>(120);
-		for(int i = 0; i < 120; i++) {
-			noteSampleMap.add(new NoteSamplePair(0xff & data[offs], 0xff & data[offs+1]));
-			offs += 2;
-		}
-		
-		volEnv = ITVolumeEnvelope.newFromData(data, offs);
-		offs += 0x52;
-		panEnv = ITPanEnvelope.newFromData(data, offs);
-		offs += 0x52;
-		pitchEnv = ITPitchEnvelope.newFromData(data, offs);
-		
+        this("", "", NNA.Cut, DCT.Off, DCA.Cut, 0, 0, 0, 128, 0, false, 0, 0, 255, 0, 0, 0, 0, ImmutableList.copyOf(emptyNoteSampleMap()), null, null, null);
+    }
+    
+    public static ITInstrument newFromData(byte[] data, int offs) {
+        String filename;
+        String instrumentName;
+        
+        NNA nna;
+        DCT dct;
+        DCA dca;
+        
+        int fadeOut;
+        int pitchPanSep;
+        int pitchPanCtr;
+        int globalVol;
+        int defaultPan;
+        boolean defaultPanEnabled;
+        int randVol;
+        int randPan;
+        
+        int filterCutoff;
+        int filterRes;
+        
+        int midiChan;
+        int midiPgm;
+        int midiBnk;
+        
+        List<NoteSamplePair> noteSampleMap;
+        
+        ITVolumeEnvelope volEnv; 
+        ITPanEnvelope panEnv; 
+        ITPitchEnvelope pitchEnv; 
+        
+        if (!Arrays.equals(Arrays.copyOfRange(data, offs, offs + 4), new byte[] { 'I', 'M', 'P', 'I' })) {
+            throw new IllegalArgumentException(String.format("instrument at 0x%x had broken impi", offs));
+        }
+        
+        offs += 4;
+        byte[] rawFilename = Arrays.copyOfRange(data, offs, offs + 12);
+        int nul = Streams.arrayIndexOf(rawFilename, (byte)0);
+        if (nul == -1) {
+            nul = rawFilename.length;
+        }
+        rawFilename = Arrays.copyOfRange(rawFilename, 0, nul);
+        try {
+            filename = new String(rawFilename, "windows-1252");
+        } catch(UnsupportedEncodingException e) {
+            // hopefully shouldn't happen as we are using a hardcoded encoding
+            l.error("Unsupported encoding: " + e.toString());
+            throw new RuntimeException(e);
+        }
+        
+        offs += 12;
+        offs++;
+        nna = NNA.values()[0xff & data[offs++]];
+        dct = DCT.values()[0xff & data[offs++]];
+        dca = DCA.values()[0xff & data[offs++]];
+        fadeOut = Streams.unpack16(data, offs);
+        offs += 2;
+        pitchPanSep = (int)data[offs++];
+        pitchPanCtr = 0xff & data[offs++];
+        globalVol = 0xff & data[offs++];
+        defaultPan = 0x7f & data[offs];
+        defaultPanEnabled = (0x80 & data[offs]) == 0;
+        offs++;
+        randVol = 0xff & data[offs++];
+        randPan = 0xff & data[offs++];
+        offs += 4;
+        
+        byte[] instname = Arrays.copyOfRange(data, offs, offs + 26);
+        nul = Streams.arrayIndexOf(instname, (byte)0);
+        if (nul == -1) {
+            nul = instname.length;
+        }
+        instname = Arrays.copyOf(instname, nul);
+        try {
+            instrumentName = new String(instname, "windows-1252");
+        } catch(UnsupportedEncodingException e) {
+            // hopefully shouldn't happen as we are using a hardcoded encoding
+            l.error("Unsupported encoding: " + e.toString());
+            throw new RuntimeException(e);
+        }
+        
+        offs += 26;
+        
+        filterCutoff = 0xff & data[offs++];
+        filterRes = 0xff & data[offs++];
+        midiChan = 0xff & data[offs++];
+        midiPgm = 0xff & data[offs++];
+        midiBnk = Streams.unpack16(data, offs);
+        offs += 2;
+        
+        noteSampleMap = new ArrayList<NoteSamplePair>(120);
+        for(int i = 0; i < 120; i++) {
+            noteSampleMap.add(new NoteSamplePair(0xff & data[offs], 0xff & data[offs+1]));
+            offs += 2;
+        }
+        
+        volEnv = ITVolumeEnvelope.newFromData(data, offs);
+        offs += 0x52;
+        panEnv = ITPanEnvelope.newFromData(data, offs);
+        offs += 0x52;
+        pitchEnv = ITPitchEnvelope.newFromData(data, offs);
+        
         return new ITInstrument(filename, instrumentName, nna, dct, dca, fadeOut, pitchPanSep, pitchPanCtr, globalVol, defaultPan, defaultPanEnabled, randVol, randPan,
                 filterCutoff, filterRes, midiChan, midiPgm, midiBnk, noteSampleMap, volEnv, panEnv, pitchEnv);
-	}
+    }
 
     @Override
     public int hashCode() {
@@ -360,6 +360,6 @@ public class ITInstrument {
         }
         return true;
     }
-	
-	
+    
+    
 }

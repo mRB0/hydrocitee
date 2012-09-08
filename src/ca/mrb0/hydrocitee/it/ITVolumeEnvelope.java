@@ -14,10 +14,10 @@ public class ITVolumeEnvelope extends ITEnvelope {
         return ImmutableList.of(new NodePoint(64, 0), new NodePoint(64, 100));
     }
     
-	public ITVolumeEnvelope() {
-	    this(false, false, false, 0, 1, 0, 0, ImmutableList.copyOf(emptyNodeList()));
-	}
-	
+    public ITVolumeEnvelope() {
+        this(false, false, false, 0, 1, 0, 0, ImmutableList.copyOf(emptyNodeList()));
+    }
+    
     public ITVolumeEnvelope(boolean enabled, boolean loop, boolean susloop,
             int loopBegin, int loopEnd, int susloopBegin, int susloopEnd,
             List<NodePoint> nodes) {
@@ -26,8 +26,8 @@ public class ITVolumeEnvelope extends ITEnvelope {
     }
 
     public static ITVolumeEnvelope newFromData(final byte[] data, final int offs) {
-		return (ITVolumeEnvelope) ITEnvelope.newEnvelopeFromData(data, offs, new Constructor(data, offs));
-	}
+        return (ITVolumeEnvelope) ITEnvelope.newEnvelopeFromData(data, offs, new Constructor(data, offs));
+    }
     
     private static final class Constructor implements EnvelopeConstructor {
         private final byte[] data;
