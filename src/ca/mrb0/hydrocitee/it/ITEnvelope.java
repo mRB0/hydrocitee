@@ -7,18 +7,18 @@ import java.util.concurrent.Callable;
 import com.google.common.collect.ImmutableList;
 
 public abstract class ITEnvelope {
-	public final boolean enabled;
-	public final boolean loop;
-	public final boolean susloop;
-	
-	public final int loopBegin;
-	public final int loopEnd;
-	public final int susloopBegin;
-	public final int susloopEnd;
-	
-	public final List<NodePoint> nodes;
+    public final boolean enabled;
+    public final boolean loop;
+    public final boolean susloop;
+    
+    public final int loopBegin;
+    public final int loopEnd;
+    public final int susloopBegin;
+    public final int susloopEnd;
+    
+    public final List<NodePoint> nodes;
 
-	protected ITEnvelope(boolean enabled, boolean loop, boolean susloop,
+    protected ITEnvelope(boolean enabled, boolean loop, boolean susloop,
             int loopBegin, int loopEnd, int susloopBegin, int susloopEnd,
             List<NodePoint> nodes) {
         super();
@@ -43,35 +43,35 @@ public abstract class ITEnvelope {
         int susloopEnd;
         
         List<NodePoint> nodes;
-		
         
-		int flags = 0xff & data[offs++];
-		enabled = (flags & 0x1) != 0;
-		loop = (flags & 0x2) != 0;
-		susloop = (flags & 0x3) != 0;
-		
-		int numPoints = 0xff & data[offs++];
-		
-		nodes = ctor.loadNodes(numPoints);
-		
-		loopBegin = 0xff & data[offs++];
-		loopEnd = 0xff & data[offs++];
-		susloopBegin = 0xff & data[offs++];
-		susloopEnd = 0xff & data[offs++];
-		
-		return ctor.construct(enabled, loop, susloop, loopBegin, loopEnd, susloopBegin, susloopEnd, nodes);
-	}
+        
+        int flags = 0xff & data[offs++];
+        enabled = (flags & 0x1) != 0;
+        loop = (flags & 0x2) != 0;
+        susloop = (flags & 0x3) != 0;
+        
+        int numPoints = 0xff & data[offs++];
+        
+        nodes = ctor.loadNodes(numPoints);
+        
+        loopBegin = 0xff & data[offs++];
+        loopEnd = 0xff & data[offs++];
+        susloopBegin = 0xff & data[offs++];
+        susloopEnd = 0xff & data[offs++];
+        
+        return ctor.construct(enabled, loop, susloop, loopBegin, loopEnd, susloopBegin, susloopEnd, nodes);
+    }
 
-	public static class NodePoint {
-		public final int val;
-		public final int tick;
+    public static class NodePoint {
+        public final int val;
+        public final int tick;
 
-		public NodePoint(int val, int tick) {
-			super();
-			this.val = val;
-			this.tick = tick;
-		}
-	}
+        public NodePoint(int val, int tick) {
+            super();
+            this.val = val;
+            this.tick = tick;
+        }
+    }
 
     @Override
     public int hashCode() {
@@ -130,8 +130,8 @@ public abstract class ITEnvelope {
         }
         return true;
     }
-	
-	
+    
+    
     protected static interface EnvelopeConstructor {
         public List<NodePoint> loadNodes(int count);
         public ITEnvelope construct(boolean enabled, boolean loop, boolean susloop,
