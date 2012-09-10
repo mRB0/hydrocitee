@@ -1,5 +1,6 @@
 package ca.mrb0.hydrocitee.playback.units;
 
+import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
 import java.util.Comparator;
 import java.util.List;
@@ -10,6 +11,18 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
 
 public class Util {
+    
+    public static int byteIndexForFrame(SampleFormat sf, int frame, int channel) {
+        int dSize;
+        if (sf.size == Size.SDouble) {
+            dSize = 8;
+        } else {
+            dSize = 4;
+        }
+        
+        return dSize * (sf.channels * frame + channel);
+    }
+    
     
     public static class BestSampleFormatSizeComparator implements Comparator<SampleFormat.Size> {
         public static final List<SampleFormat.Size> formatPreference = ImmutableList.of(
@@ -22,6 +35,10 @@ public class Util {
         }
     }
     
+    public static interface SampleBufferWriter {
+        public void writeSample(ByteBuffer dest, int index, Number sample);
+    }
+
     public static SampleFormat getBestMatchingFormat(SupportedSampleFormats inFormats, SupportedSampleFormats outFormats) {
         Ordering<Integer> ordering = Ordering.natural();
         
@@ -61,5 +78,18 @@ public class Util {
             throw new IllegalArgumentException("Couldn't find any matching sample formats");
         }
         return new SampleFormat(channels, bestSize);
+    }
+
+    public static SampleBufferWriter writerForFormat(SampleFormat fmt) {
+        if (fmt.size == Size.SFloat) {
+            return new SampleBufferWriter() {
+                @Override
+                public void writeSample(ByteBuffer dest, int index, Number sample) {
+                    dest.putFloat(index, sample.floatValue());
+                }
+            };
+        } else {
+            throw new UnsupportedOperationException("not implemented");
+        }
     }
 }
