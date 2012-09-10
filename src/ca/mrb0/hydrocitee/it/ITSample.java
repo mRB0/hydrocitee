@@ -79,7 +79,7 @@ public class ITSample {
         this.vibrWaveform = vibrWaveform;
         this.defaultPanEnabled = defaultPanEnabled;
         this.defaultPan = defaultPan;
-        this.sampleData = Optional.absent();
+        this.sampleData = sampleData;
     }
     
     public ITSample() {
