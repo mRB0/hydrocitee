@@ -247,7 +247,8 @@ public class ITSampleDataDecompressor {
         
         int sample;
         while ((sample = decompressor.nextSample()) != -1 && decompressedIdx < dataLengthSamples) {
-            decompressed.set(decompressedIdx++, sample);
+            decompressedIdx++;
+            decompressed.add(sample);
         }
         
         if (decompressedIdx != dataLengthSamples) {
