@@ -41,12 +41,12 @@ public class SampleConversion implements Unit {
     
     @Override
     public UnitState getState() {
-        throw new IllegalArgumentException("Not implemented");
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
     public void useState(UnitState state) {
-        throw new IllegalArgumentException("Not implemented");
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
@@ -69,7 +69,7 @@ public class SampleConversion implements Unit {
         } else if (inFormat.size == Size.Sint32 || inFormat.size == Size.Sint16 || inFormat.size == Size.Uint16 || inFormat.size == Size.Sint8 || inFormat.size == Size.Uint8) {
             sourceBuffer = ByteBuffer.allocate(4 * inFormat.channels);
         }
-        writer = writerForFormat(outFormat);
+        writer = Util.writerForFormat(outFormat);
         
         this.sourceOutputPort = sourceOutputPort;
         this.source = source;
@@ -77,7 +77,7 @@ public class SampleConversion implements Unit {
     
     private int sourceOutputPort;
     private ByteBuffer sourceBuffer;
-    private SampleBufferWriter writer;
+    private Util.SampleBufferWriter writer;
     
     @Override
     public void setOutputFormat(int outputPort, SampleFormat format) {
@@ -136,24 +136,6 @@ public class SampleConversion implements Unit {
         }
         
         return len;
-    }
-    
-    static interface SampleBufferWriter {
-        public void writeSample(ByteBuffer dest, int index, Number sample);
-    }
-    
-    static SampleBufferWriter writerForFormat(SampleFormat fmt) {
-        if (fmt.size == Size.SFloat) {
-            return new SampleBufferWriter() {
-                @Override
-                public void writeSample(ByteBuffer dest, int index, Number sample) {
-                    int actualIndex = index * 4;
-                    dest.putFloat(index, sample.floatValue());
-                }
-            };
-        } else {
-            throw new UnsupportedOperationException("not implemented");
-        }
     }
     
 }
